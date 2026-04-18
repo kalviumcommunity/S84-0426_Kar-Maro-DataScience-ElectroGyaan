@@ -6,8 +6,6 @@ __pycache__/
 # Models
 *.pkl
 
-# Data (optional if large)
-data/
 
 # VS Code
 .vscode/
