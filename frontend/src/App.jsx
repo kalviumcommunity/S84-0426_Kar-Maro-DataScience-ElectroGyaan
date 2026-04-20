@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { energyApi } from './api/apiClient';
 import RealTimeChart from './components/RealTimeChart';
+import AnomalyFeed from './components/AnomalyFeed';
 import './App.css';
 
 function App() {
@@ -73,8 +74,8 @@ function App() {
              <div className="bg-neutral-800 rounded-xl p-6 border border-neutral-700 h-64 flex items-center justify-center">
                <p className="text-neutral-400">ML Insights Widget (PR 10) will go here</p>
              </div>
-             <div className="bg-neutral-800 rounded-xl p-6 border border-neutral-700 h-64 flex items-center justify-center">
-               <p className="text-neutral-400">Anomaly Alert Feed (PR 10) will go here</p>
+             <div className="bg-neutral-800 rounded-xl p-6 border border-neutral-700 h-64 overflow-hidden">
+               {selectedUser ? <AnomalyFeed userId={selectedUser} /> : <p className="text-neutral-400">Waiting for user selection...</p>}
              </div>
           </div>
         </div>
