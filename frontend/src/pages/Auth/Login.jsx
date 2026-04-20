@@ -1,7 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
 import { LucideZap, LucideMail, LucideLock, LucideArrowRight } from 'lucide-react';
 
 export default function Login() {
+  const [email, setEmail] = useState('admin@greenmeadows.com');
+  const [password, setPassword] = useState('admin123');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { login, googleLogin } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const res = await login(email, password);
+      if (res.success) {
+        navigate('/dashboard');
+      } else {
+        setError(res.message || 'Login failed. Please check your credentials.');
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('');
+    setIsLoading(true);
+    try {
+      const res = await googleLogin(credentialResponse.credential);
+      if (res.success) {
+        navigate('/dashboard');
+      } else {
+        setError(res.message || 'Google login failed');
+      }
+    } catch (err) {
+      setError('Google login encountered an error.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#060913] text-gray-100 flex font-inter relative overflow-hidden">
       
@@ -26,18 +72,25 @@ export default function Login() {
           <p className="text-[14px] text-gray-400 font-medium">Sign in to the Admin Dashboard for Green Meadows.</p>
         </div>
 
-        {/* OR DIVIDER - Optional */}
+        {error && (
+          <div className="mt-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-[13px] font-medium">
+            {error}
+          </div>
+        )}
 
         {/* INPUT FORM */}
-        <form className="mt-8 flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
           <div className="relative">
             <label className="text-[12px] font-bold text-gray-500 uppercase tracking-widest pl-1 mb-2 block">Email Address</label>
             <div className="relative flex items-center">
               <LucideMail className="w-5 h-5 text-gray-500 absolute left-4 z-10" />
               <input 
                 type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@greenmeadows.com" 
                 className="w-full h-[48px] bg-level-2 border border-subtle rounded-xl pl-12 pr-4 text-[14px] text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)] transition-all font-medium"
+                required
               />
             </div>
           </div>
@@ -51,21 +104,45 @@ export default function Login() {
               <LucideLock className="w-5 h-5 text-gray-500 absolute left-4 z-10" />
               <input 
                 type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••" 
-                defaultValue="admin123"
                 className="w-full h-[48px] bg-level-2 border border-subtle rounded-xl pl-12 pr-4 text-[14px] text-white font-mono placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)] transition-all"
+                required
               />
             </div>
           </div>
 
           <button 
-            type="button" 
-            className="mt-4 w-full h-[48px] bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-[0_0_16px_rgba(59,130,246,0.4)] transition-all group"
+            type="submit" 
+            disabled={isLoading}
+            className="mt-4 w-full h-[48px] bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-[0_0_16px_rgba(59,130,246,0.4)] transition-all group disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Sign In to Dashboard
-            <LucideArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            {isLoading ? 'Signing in...' : 'Sign In to Dashboard'}
+            {!isLoading && <LucideArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
           </button>
         </form>
+
+        {/* OR DIVIDER & GOOGLE LOGIN */}
+        <div className="mt-8 flex flex-col items-center">
+          <div className="flex items-center w-full gap-4 mb-6">
+            <div className="h-[1px] bg-subtle flex-1"></div>
+            <span className="text-[12px] font-bold text-gray-500 uppercase tracking-widest">OR</span>
+            <div className="h-[1px] bg-subtle flex-1"></div>
+          </div>
+          
+          <div className="w-full flex justify-center [&>div]:w-full [&>div>div]:w-full">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError('Google login failed')}
+              theme="filled_black"
+              shape="rectangular"
+              size="large"
+              text="continue_with"
+              width="100%"
+            />
+          </div>
+        </div>
 
         <div className="mt-[60px] pt-6 border-t border-subtle text-[12px] text-gray-500 font-medium">
           Protected by <span className="text-gray-300">Phase.Zero Security API</span> · v2.4.1

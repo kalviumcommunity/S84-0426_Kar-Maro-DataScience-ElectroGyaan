@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { LucideZap, LucideArrowRight, LucidePlay, LucideActivity, LucideTrendingUp, LucideBell, LucidePlug, LucideBrainCircuit } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 
@@ -13,18 +14,17 @@ export default function Landing() {
           <span className="text-[12px] text-blue-400 align-super ml-[1px]">AI</span>
         </div>
         <div className="flex gap-[32px]">
-          <a href="#" className="text-[14px] font-medium text-white transition-colors duration-150">Features</a>
-          <a href="#" className="text-[14px] font-medium text-gray-300 hover:text-white transition-colors duration-150">How It Works</a>
-          <a href="#" className="text-[14px] font-medium text-gray-300 hover:text-white transition-colors duration-150">Pricing</a>
-          <a href="#" className="text-[14px] font-medium text-gray-300 hover:text-white transition-colors duration-150">Docs</a>
+          <a href="#features" className="text-[14px] font-medium text-gray-300 hover:text-white transition-colors duration-150">Features</a>
+          <a href="#how-it-works" className="text-[14px] font-medium text-gray-300 hover:text-white transition-colors duration-150">How It Works</a>
+          <a href="#docs" className="text-[14px] font-medium text-gray-300 hover:text-white transition-colors duration-150">Docs</a>
         </div>
         <div className="flex items-center gap-[12px]">
-          <button className="h-[36px] px-[16px] text-[14px] text-gray-300 font-medium hover:text-white border border-transparent hover:border-strong hover:bg-level-3 rounded-md transition-all">
+          <Link to="/login" className="h-[36px] flex items-center px-[16px] text-[14px] text-gray-300 font-medium hover:text-white border border-transparent hover:border-strong hover:bg-level-3 rounded-md transition-all">
             Log In
-          </button>
-          <button className="h-[36px] px-[16px] text-[14px] font-semibold text-white bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 rounded-md hover:shadow-[0_0_20px_rgba(59,130,246,0.25)] flex items-center transition-all active:scale-95">
-            Get Started Free <LucideArrowRight className="w-[14px] h-[14px] ml-[6px]" />
-          </button>
+          </Link>
+          <Link to="/dashboard" className="h-[36px] px-[16px] text-[14px] font-semibold text-white bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 rounded-md hover:shadow-[0_0_20px_rgba(59,130,246,0.25)] flex items-center transition-all active:scale-95">
+            Get Started <LucideArrowRight className="w-[14px] h-[14px] ml-[6px]" />
+          </Link>
         </div>
       </nav>
 
@@ -56,9 +56,9 @@ export default function Landing() {
             </p>
 
             <div className="mt-[40px] flex gap-[14px]">
-              <button className="h-[48px] px-[28px] text-[16px] font-semibold text-white bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 rounded-md hover:shadow-[0_0_20px_rgba(59,130,246,0.25)] flex items-center transition-all active:scale-95">
-                Start Free Trial <LucideArrowRight className="w-[16px] h-[16px] ml-[8px]" />
-              </button>
+              <Link to="/dashboard" className="h-[48px] px-[28px] text-[16px] font-semibold text-white bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 rounded-md hover:shadow-[0_0_20px_rgba(59,130,246,0.25)] flex items-center transition-all active:scale-95">
+                Get Started <LucideArrowRight className="w-[16px] h-[16px] ml-[8px]" />
+              </Link>
               <button className="h-[48px] px-[24px] rounded-md border border-default text-gray-300 hover:border-strong hover:bg-level-3 hover:text-white flex items-center transition-all">
                 <div className="w-[24px] h-[24px] bg-white/10 rounded-full flex items-center justify-center mr-[8px]">
                   <LucidePlay className="w-[10px] h-[10px] text-white ml-[2px]" fill="currentColor" />
@@ -113,6 +113,114 @@ export default function Landing() {
           </div>
         </div>
       </div>
+
+      {/* FEATURES SECTION */}
+      <section id="features" className="py-[120px] px-[80px] max-w-[1280px] mx-auto">
+        <div className="text-center mb-[80px]">
+          <h2 className="text-[36px] font-bold text-white mb-4">Unprecedented Grid Visibility</h2>
+          <p className="text-[18px] text-gray-400 max-w-[600px] mx-auto">Stop guessing where power is being wasted. Get precise, apartment-level diagnostics and predictive anomaly detection.</p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-[32px]">
+          <FeatureCard 
+            icon={LucideActivity} color="text-amber-400" bg="bg-amber-400/10" border="border-amber-400/20"
+            title="Real-Time Telemetry" 
+            desc="Live feeds from every transformer and apartment with sub-second latency filtering."
+          />
+          <FeatureCard 
+            icon={LucideBrainCircuit} color="text-blue-400" bg="bg-blue-400/10" border="border-blue-400/20"
+            title="Predictive Neural Network" 
+            desc="Our ML engine analyzes Z-scores to accurately flag upcoming phase imbalances."
+          />
+          <FeatureCard 
+            icon={LucideBell} color="text-red-400" bg="bg-red-400/10" border="border-red-400/20"
+            title="Automated Alerting" 
+            desc="Instant SMS and webhook triggers directly to maintenance teams to prevent critical overloads."
+          />
+        </div>
+      </section>
+
+      {/* HOW IT WORKS SECTION */}
+      <section id="how-it-works" className="py-[120px] px-[80px] bg-level-1 border-t border-b border-subtle">
+        <div className="max-w-[1280px] mx-auto grid grid-cols-2 gap-[80px] items-center">
+           <div>
+             <h2 className="text-[36px] font-bold text-white mb-6">Built for Scale, Designed for Humans.</h2>
+             <p className="text-[18px] text-gray-400 mb-10 leading-relaxed">
+               The entire infrastructure from ingestion to the dashboard is tightly coupled. ElectroGyaan intercepts raw IoT MQTT packets, validates anomaly parameters via statistical heuristics in your localized node, and renders complex analytics within an absolute native SaaS shell.
+             </p>
+             <ul className="flex flex-col gap-6">
+                <li className="flex gap-4">
+                  <div className="w-[32px] h-[32px] rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-mono font-bold text-[14px] shrink-0 mt-1">1</div>
+                  <div>
+                    <h4 className="text-[16px] font-bold text-white">Smart Meter Integration</h4>
+                    <p className="text-[14px] text-gray-400 mt-1">Securely bind building hardware arrays directly to your Cloud endpoint.</p>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <div className="w-[32px] h-[32px] rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-mono font-bold text-[14px] shrink-0 mt-1">2</div>
+                  <div>
+                    <h4 className="text-[16px] font-bold text-white">Continuous Computation</h4>
+                    <p className="text-[14px] text-gray-400 mt-1">The system establishes 24-hour moving baselines for regular load capacity.</p>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <div className="w-[32px] h-[32px] rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-mono font-bold text-[14px] shrink-0 mt-1">3</div>
+                  <div>
+                    <h4 className="text-[16px] font-bold text-white">Decisive Action</h4>
+                    <p className="text-[14px] text-gray-400 mt-1">Export analytical reports automatically and restrict rogue loads dynamically.</p>
+                  </div>
+                </li>
+             </ul>
+           </div>
+           <div className="bg-level-2 h-[500px] border border-subtle rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col">
+              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[80px] pointer-events-none"></div>
+              <div className="text-[14px] font-mono text-gray-500 mb-4">[ Live Execution Payload Trace ]</div>
+              <div className="flex-1 bg-level-0 rounded-lg border border-subtle p-4 font-mono text-[12px] text-green-400/80 leading-relaxed overflow-hidden">
+                <span className="text-blue-400">{'>>'} POST /api/ingest</span><br/>
+                {'{\n'}
+                {'  "building": "GM-A",\n'}
+                {'  "units": 50,\n'}
+                {'  "aggregated": 412.5,\n'}
+                {'  "timestamp": "14:24:00Z"\n'}
+                {'}'}<br/><br/>
+                <span className="text-gray-500">{"// Running inference model..."}</span><br/><br/>
+                <span className="text-amber-400">{'>>'} WARN: Phase A deviation detected (z=2.8)</span><br/>
+                <span className="text-gray-500">{"// Dispatched push notification"}</span><br/>
+                <span className="text-blue-400">{'>>'} 200 OK</span><br/>
+              </div>
+           </div>
+        </div>
+      </section>
+      
+      {/* FINAL CTA & FOOTER */}
+      <section className="py-[100px] text-center max-w-[800px] mx-auto px-[20px]">
+        <h2 className="text-[32px] font-bold text-white mb-6">Ready to optimize your infrastructure?</h2>
+        <Link to="/dashboard" className="inline-flex h-[56px] px-[32px] text-[16px] font-semibold text-white bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 rounded-md hover:shadow-[0_0_24px_rgba(59,130,246,0.3)] items-center justify-center transition-all active:scale-95">
+          Get Started Now
+        </Link>
+        <div className="mt-[80px] pt-[40px] border-t border-subtle text-[14px] text-gray-500 flex justify-between">
+           <div className="flex items-center gap-2">
+             <LucideZap className="w-4 h-4 text-amber-400" />
+             <span className="font-semibold text-gray-400">ElectroGyaan AI</span>
+           </div>
+           <div className="flex gap-6">
+             <a id="docs" href="#" className="hover:text-white transition-colors">Documentation</a>
+             <a href="#" className="hover:text-white transition-colors">API Reference</a>
+             <a href="#" className="hover:text-white transition-colors">Privacy</a>
+           </div>
+        </div>
+      </section>
+
     </div>
   );
 }
+
+const FeatureCard = ({ icon: Icon, color, bg, border, title, desc }) => (
+  <div className="p-6 bg-level-2 border border-subtle rounded-xl hover:border-strong transition-colors group">
+    <div className={`w-[48px] h-[48px] ${bg} ${border} border rounded-lg flex items-center justify-center mb-6`}>
+      <Icon className={`w-[24px] h-[24px] ${color}`} />
+    </div>
+    <h3 className="text-[20px] font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">{title}</h3>
+    <p className="text-[15px] text-gray-400 leading-relaxed">{desc}</p>
+  </div>
+);
