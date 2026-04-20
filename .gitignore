@@ -1,11 +1,10 @@
-# Python
+﻿# Python
 venv/
 __pycache__/
 *.pyc
 
 # Models
 *.pkl
-
 
 # VS Code
 .vscode/
@@ -15,3 +14,13 @@ __pycache__/
 
 # OS
 .DS_Store
+
+# Node
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+.env
+npm-debug.log
+yarn-error.log
+dist/
+build/
