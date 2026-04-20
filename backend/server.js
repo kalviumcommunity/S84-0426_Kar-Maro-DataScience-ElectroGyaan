@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
+import energyRoutes from './routes/energyRoutes.js';
 
 dotenv.config();
 
@@ -13,6 +14,9 @@ app.use(express.json());
 
 // Connect to MongoDB
 connectDB();
+
+// Routes
+app.use('/api/energy', energyRoutes);
 
 // Basic Health Route
 app.get('/api/health', (req, res) => {
