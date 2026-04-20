@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import csv from 'csv-parser';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import connectDB from '../config/db.js';
 import EnergyData from '../models/EnergyData.js';
 import User from '../models/User.js';
