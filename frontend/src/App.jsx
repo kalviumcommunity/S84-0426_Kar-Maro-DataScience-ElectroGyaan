@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { energyApi } from './api/apiClient';
+import RealTimeChart from './components/RealTimeChart';
 import './App.css';
 
 function App() {
@@ -64,8 +65,8 @@ function App() {
         </header>
         
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div className="bg-neutral-800 rounded-xl p-6 border border-neutral-700 h-96 flex items-center justify-center">
-             <p className="text-neutral-400">Chart Component (PR 9) will go here</p>
+          <div className="bg-neutral-800 rounded-xl p-6 border border-neutral-700 h-96">
+             {selectedUser ? <RealTimeChart userId={selectedUser} /> : <p className="text-neutral-400">Select a user to view data</p>}
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
