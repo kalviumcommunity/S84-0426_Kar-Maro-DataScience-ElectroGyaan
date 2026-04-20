@@ -5,7 +5,7 @@ function App() {
   const [selectedUser, setSelectedUser] = useState('user-001');
 
   // Mock list of 50 users (Will be fetched via API in PR 8)
-  const users = Array.from({ length: 50 }, (_, i) => \user-\\);
+  const users = Array.from({ length: 50 }, (_, i) => `user-${String(i + 1).padStart(3, '0')}`);
 
   return (
     <div className="flex h-screen bg-neutral-900 text-white font-sans">
@@ -20,7 +20,11 @@ function App() {
             <button
               key={userId}
               onClick={() => setSelectedUser(userId)}
-              className={\w-full text-left px-4 py-2 rounded-md transition-colors \\}
+              className={`w-full text-left px-4 py-2 rounded-md transition-colors ${
+                selectedUser === userId 
+                  ? 'bg-emerald-500/20 text-emerald-400 font-medium' 
+                  : 'text-neutral-300 hover:bg-neutral-700 hover:text-white'
+              }`}
             >
               {userId}
             </button>
