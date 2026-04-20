@@ -1,6 +1,9 @@
 import User from '../models/User.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Helper function to generate JWT and send cookie response
 const sendTokenResponse = (user, statusCode, res) => {
@@ -136,5 +139,45 @@ export const getMe = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// @desc    Google OAuth Login
+// @route   POST /api/auth/google
+// @access  Public
+export const googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+    
+    // Verify token from Google
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    
+    const { name, email, sub: googleId } = ticket.getPayload();
+
+    // Check if user exists
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // If user exists but no googleId (registered via email/password previously), link the account
+      if (!user.googleId) {
+        user.googleId = googleId;
+        await user.save();
+      }
+    } else {
+      // Automatically register a new user
+      user = await User.create({
+        name,
+        email,
+        googleId,
+        role: 'user'
+      });
+    }
+
+    sendTokenResponse(user, 200, res);
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Google authentication failed', error: error.message });
   }
 };
