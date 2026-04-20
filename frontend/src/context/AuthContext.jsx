@@ -9,11 +9,6 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      // Temporary bypass: Treat the user as logged out or mock a logged-in user without making API calls
-      // because the backend might not be running right now.
-      setUser({ name: 'Admin', email: 'admin@greenmeadows.com', role: 'admin' });
-      setLoading(false);
-      /*
       try {
         const response = await energyApi.getMe();
         if (response.success) {
@@ -24,7 +19,6 @@ export const AuthProvider = ({ children }) => {
       } finally {
         setLoading(false);
       }
-      */
     };
     checkAuthStatus();
   }, []);
