@@ -1,11 +1,30 @@
-﻿import { useState } from 'react';
+﻿import { useState, useEffect } from 'react';
+import { energyApi } from './api/apiClient';
 import './App.css';
 
 function App() {
   const [selectedUser, setSelectedUser] = useState('user-001');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock list of 50 users (Will be fetched via API in PR 8)
-  const users = Array.from({ length: 50 }, (_, i) => `user-${String(i + 1).padStart(3, '0')}`);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await energyApi.getUsers();
+        if (response.success && response.data.length > 0) {
+           setUsers(response.data.sort());
+           if (!response.data.includes(selectedUser)) {
+             setSelectedUser(response.data[0]);
+           }
+        }
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   return (
     <div className="flex h-screen bg-neutral-900 text-white font-sans">
@@ -16,19 +35,25 @@ function App() {
           <p className="text-xs text-neutral-400 mt-1">Select a household</p>
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {users.map(userId => (
-            <button
-              key={userId}
-              onClick={() => setSelectedUser(userId)}
-              className={`w-full text-left px-4 py-2 rounded-md transition-colors ${
-                selectedUser === userId 
-                  ? 'bg-emerald-500/20 text-emerald-400 font-medium' 
-                  : 'text-neutral-300 hover:bg-neutral-700 hover:text-white'
-              }`}
-            >
-              {userId}
-            </button>
-          ))}
+          {loading ? (
+             <div className="text-neutral-500 text-sm p-4 text-center">Loading users...</div>
+          ) : users.length === 0 ? (
+             <div className="text-neutral-500 text-sm p-4 text-center">No users found in database</div>
+          ) : (
+            users.map(userId => (
+              <button
+                key={userId}
+                onClick={() => setSelectedUser(userId)}
+                className={`w-full text-left px-4 py-2 rounded-md transition-colors ${
+                  selectedUser === userId 
+                    ? 'bg-emerald-500/20 text-emerald-400 font-medium' 
+                    : 'text-neutral-300 hover:bg-neutral-700 hover:text-white'
+                }`}
+              >
+                {userId}
+              </button>
+            ))
+          )}
         </div>
       </aside>
 
