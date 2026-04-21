@@ -1,6 +1,16 @@
 {
-  "dependencies": {
-    "lucide-react": "^1.8.0",
-    "recharts": "^3.8.1"
+  "name": "electrogyaan-ai",
+  "version": "1.0.0",
+  "scripts": {
+    "install:all": "npm i && cd backend && npm i && cd ../frontend && npm i",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:ml": "cd ml-service && uvicorn main:app --reload --port 8000",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:sim": "cd backend && node simulator.js",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "simulate": "npm run dev:sim"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

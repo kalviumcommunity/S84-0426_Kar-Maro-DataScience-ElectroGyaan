@@ -1,11 +1,19 @@
-import express from 'express';
-import { ingestEnergyData, getUsers, getEnergyData, getAlerts } from '../controllers/energyController.js';
-
+const express = require('express');
 const router = express.Router();
+const energyController = require('../controllers/energyController');
 
-router.get('/users', getUsers);
-router.post('/ingest', ingestEnergyData);
-router.get('/:userId', getEnergyData);
-router.get('/:userId/alerts', getAlerts);
+router.post('/api/energy/ingest', energyController.ingestReading);
 
-export default router;
+router.get('/api/energy/history/:flatId', energyController.getHistory);
+
+router.get('/api/energy/predict/:flatId', energyController.getPrediction);
+
+router.get('/api/energy/stats/:flatId', energyController.getStats);
+
+router.get('/api/energy/anomalies/:flatId', energyController.getAnomalies);
+
+router.get('/api/energy/hourly-pattern/:flatId', energyController.getHourlyPattern);
+
+router.get('/api/energy/all-flats', energyController.getAllFlatsStats);
+
+module.exports = router;

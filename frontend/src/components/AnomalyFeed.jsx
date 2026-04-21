@@ -1,43 +1,26 @@
-import { useEffect, useState } from 'react';
-import { formatDistanceToNow } from 'date-fns';
-import { energyApi } from '../api/apiClient';
 import { AlertTriangle, AlertCircle } from 'lucide-react';
 
-const AnomalyFeed = ({ userId }) => {
-  const [alerts, setAlerts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Poll for alerts every 10s (similar to main chart)
-  useEffect(() => {
-    if (!userId) return;
-
-    const loadAlerts = async () => {
-      try {
-        const response = await energyApi.getAlerts(userId);
-        if (response.success) {
-          setAlerts(response.data);
-        }
-      } catch (error) {
-        console.error('Failed fetching alerts', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadAlerts();
-    const interval = setInterval(loadAlerts, 10000);
-    return () => clearInterval(interval);
-  }, [userId]);
-
-  if (loading) {
-    return <div className="text-neutral-500 text-sm">Scanning for anomalies...</div>;
+const AnomalyFeed = ({ anomalies, loading }) => {
+  if (loading && (!anomalies || anomalies.length === 0)) {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="mb-4 animate-pulse">
+          <div className="h-6 bg-gray-700 rounded w-1/2"></div>
+        </div>
+        <div className="flex-1 space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-20 bg-gray-800 rounded animate-pulse"></div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
-  if (alerts.length === 0) {
+  if (!anomalies || anomalies.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-neutral-500 space-y-2">
         <AlertCircle size={32} className="text-neutral-600" />
-        <p>No recent anomalies detected</p>
+        <p>✅ No anomalies detected</p>
       </div>
     );
   }
@@ -49,13 +32,18 @@ const AnomalyFeed = ({ userId }) => {
           <AlertTriangle size={18} /> Alert Feed
         </h3>
         <span className="text-xs px-2 py-1 bg-rose-500/20 text-rose-400 rounded-full">
-          {alerts.length} Warnings
+          {anomalies.length} Warnings
         </span>
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-        {alerts.map((alert) => {
-          const isCritical = alert.severity === 'CRITICAL';
+        {anomalies.map((alert) => {
+          const isCritical = alert.units_kWh > 13;
+          const timeStr = new Date(alert.timestamp).toLocaleTimeString('en-IN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          });
           
           return (
             <div 
@@ -67,16 +55,28 @@ const AnomalyFeed = ({ userId }) => {
               }`}
             >
               <div className="flex justify-between items-start">
-                <span className={`text-sm font-semibold capitalize ${
+                <span className={`text-sm font-semibold ${
                   isCritical ? 'text-rose-400' : 'text-amber-400'
                 }`}>
-                  • {alert.severity.toLowerCase()}
+                  🚨 Flat {alert.flatId}
                 </span>
                 <span className="text-xs text-neutral-400">
-                  {formatDistanceToNow(new Date(alert.timestamp), { addSuffix: true })}
+                  {timeStr}
                 </span>
               </div>
-              <p className="text-sm text-neutral-300">{alert.message}</p>
+              <p className="text-sm text-neutral-300">
+                Spike: {alert.units_kWh.toFixed(2)} kWh
+                {alert.mlConfidence && ` (Confidence: ${(alert.mlConfidence * 100).toFixed(0)}%)`}
+              </p>
+              <div className="flex justify-between items-center mt-1">
+                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  isCritical 
+                  ? 'bg-rose-900/50 text-rose-400 border border-rose-500/30' 
+                  : 'bg-amber-900/50 text-amber-400 border border-amber-500/30'
+                }`}>
+                  {isCritical ? 'CRITICAL' : 'WARNING'}
+                </span>
+              </div>
             </div>
           );
         })}

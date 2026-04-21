@@ -1,71 +1,72 @@
 import axios from 'axios';
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-  timeout: 10000,
-  withCredentials: true,
+const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000',
+  timeout: 8000,
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  withCredentials: true
 });
 
+apiClient.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    // Don't log 401 errors (expected when not logged in)
+    if (err.response?.status !== 401) {
+      console.error('[API Error]', err.message);
+    }
+    return Promise.reject(err);
+  }
+);
+
+// Authentication API methods
 export const energyApi = {
-  /* --- AUTHENTICATION ROUTES --- */
-  login: async (credentials) => {
+  // Auth endpoints
+  signup: async (data) => {
     try {
-      const res = await api.post('/auth/login', credentials);
-      return res.data;
-    } catch (err) {
-      return err.response?.data || { success: false, message: 'Server error' };
+      const response = await apiClient.post('/api/auth/signup', data);
+      return { success: true, data: response.data.user };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Signup failed' };
     }
   },
-  signup: async (userData) => {
+
+  login: async (data) => {
     try {
-      const res = await api.post('/auth/signup', userData);
-      return res.data;
-    } catch (err) {
-      return err.response?.data || { success: false, message: 'Server error' };
+      const response = await apiClient.post('/api/auth/login', data);
+      return { success: true, data: response.data.user };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Login failed' };
     }
   },
+
   googleLogin: async (data) => {
     try {
-      const res = await api.post('/auth/google', data);
-      return res.data;
-    } catch (err) {
-      return err.response?.data || { success: false, message: 'Server error' };
+      const response = await apiClient.post('/api/auth/google', data);
+      return { success: true, data: response.data.user };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Google login failed' };
     }
   },
+
   logout: async () => {
     try {
-      const res = await api.post('/auth/logout');
-      return res.data;
-    } catch (err) {
-      return err.response?.data || { success: false, message: 'Server error' };
+      await apiClient.post('/api/auth/logout');
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Logout failed' };
     }
   },
+
   getMe: async () => {
     try {
-      const res = await api.get('/auth/me');
-      return res.data;
-    } catch (err) {
-      return err.response?.data || { success: false, message: 'Server error' };
+      const response = await apiClient.get('/api/auth/me');
+      return { success: true, data: response.data.user };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Failed to get user' };
     }
-  },
-
-  // Fetch distinct users list
-  getUsers: async () => {
-    const res = await api.get('/energy/users');
-    return res.data;
-  },
-
-  // Fetch specific user's historical and real-time energy context
-  getEnergyData: async (userId, limit = 168) => {
-    const res = await api.get(`/energy/${userId}?limit=${limit}`);
-    return res.data;
-  },
-
-  // Fetch ML anomaly alerts
-  getAlerts: async (userId, limit = 10) => {
-    const res = await api.get(`/energy/${userId}/alerts?limit=${limit}`);
-    return res.data;
   }
 };
 
-export default api;
+export default apiClient;
