@@ -1,14 +1,18 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-export const verifyToken = async (req, res, next) => {
+// Protect routes
+exports.verifyToken = async (req, res, next) => {
   let token;
 
-  // Check if token exists in cookies
-  if (req.cookies && req.cookies.token) {
+  // Check for token in cookies or Authorization header
+  if (req.cookies.token) {
     token = req.cookies.token;
+  } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
   }
 
+  // Make sure token exists
   if (!token) {
     return res.status(401).json({ success: false, message: 'Not authorized to access this route' });
   }
@@ -17,7 +21,6 @@ export const verifyToken = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key_if_env_missing');
 
-    // Attach user to req object
     req.user = await User.findById(decoded.id);
 
     if (!req.user) {
@@ -26,15 +29,19 @@ export const verifyToken = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('Token verification error:', error);
     return res.status(401).json({ success: false, message: 'Not authorized to access this route' });
   }
 };
 
-export const isAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+// Grant access to specific roles
+exports.authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: `User role ${req.user.role} is not authorized to access this route`
+      });
+    }
     next();
-  } else {
-    res.status(403).json({ success: false, message: 'Not authorized. Admin access required.' });
-  }
+  };
 };

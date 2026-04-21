@@ -7,36 +7,65 @@ import {
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Scatter, ComposedChart
 } from 'recharts';
-
-// Specific Dummy Data for Electrogyaan AI
-const chartData = [
-  { time: '18:00', kwh: 12.1 },
-  { time: '18:15', kwh: 12.8 },
-  { time: '18:30', kwh: 13.2 },
-  { time: '18:45', kwh: 13.7, anomaly: true, id: 'A112' },
-  { time: '19:00', kwh: 14.1 },
-  { time: '19:15', kwh: 14.8 },
-  { time: '19:30', kwh: 15.2 },
-  { time: '19:45', kwh: 14.6 }
-];
-
-const anomalyFeed = [
-  { id: 'A112', kwh: '13.7', time: '18:45:12 · Today', level: 'Critical' },
-  { id: 'A134', kwh: '11.2', time: '18:32:07 · Today', level: 'Warning' },
-  { id: 'A108', kwh: '14.9', time: '17:58:44 · Today', level: 'Critical' },
-  { id: 'A127', kwh: '10.5', time: '17:45:19 · Today', level: 'Warning' },
-  { id: 'A119', kwh: '12.8', time: '16:22:03 · Today', level: 'Critical' },
-];
-
-const topPredicted = [
-  { id: 'A112', kwh: '3.2', pct: 100 },
-  { id: 'A134', kwh: '2.9', pct: 91 },
-  { id: 'A108', kwh: '2.7', pct: 84 },
-  { id: 'A127', kwh: '2.5', pct: 78 },
-  { id: 'A119', kwh: '2.3', pct: 72 },
-];
+import { useEnergyData } from '../../hooks/useEnergyData';
+import MemeAlertModal from '../../components/MemeAlertModal';
 
 export default function Dashboard() {
+  const { energyData, stats, anomalies, prediction, loading, error, newAnomalyDetected } = useEnergyData('A101');
+  const [showMeme, setShowMeme] = useState(false);
+
+  const chartData = energyData.map(d => ({
+    time: new Date(d.timestamp).toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }),
+    kwh: d.units_kWh,
+    anomaly: d.isAnomaly,
+    id: d.flatId
+  }));
+
+  const anomalyFeed = anomalies.slice(0, 5).map(a => ({
+    id: a.flatId,
+    kwh: a.units_kWh.toFixed(1),
+    time: new Date(a.timestamp).toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }) + ' · Today',
+    level: a.units_kWh > 13 ? 'Critical' : 'Warning',
+    _id: a._id
+  }));
+
+  const topPredicted = energyData
+    .slice(-5)
+    .sort((a, b) => b.units_kWh - a.units_kWh)
+    .map((d, i) => ({
+      id: d.flatId,
+      kwh: d.units_kWh.toFixed(1),
+      pct: 100 - (i * 9)
+    }));
+  if (loading && !stats) {
+    return (
+      <DashboardLayout>
+        <div className="p-8 bg-[#0A0F1E]">
+          <div className="flex gap-5">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="flex-1 bg-level-2 border border-subtle rounded-xl p-5 h-[140px] animate-pulse">
+                <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
+                <div className="h-8 bg-gray-700 rounded w-3/4"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const criticalCount = anomalies.filter(a => a.units_kWh > 13).length;
+  const warningCount = anomalies.length - criticalCount;
+
   return (
     <DashboardLayout>
       <div className="p-8 bg-[#0A0F1E]">
@@ -47,8 +76,8 @@ export default function Dashboard() {
             accentColor="amber" 
             label="TODAY'S CONSUMPTION" 
             icon={<LucideZap className="w-[14px] h-[14px] text-amber-500" />}
-            value={<>847.3 <span className="text-[14px] text-gray-400 font-inter">kWh</span></>}
-            change="↑ +12.4% vs yesterday"
+            value={<>{stats?.totalConsumption?.toFixed(1) || '--'} <span className="text-[14px] text-gray-400 font-inter">kWh</span></>}
+            change={stats?.totalConsumption > 0 ? `↑ ${((stats.totalConsumption / 800) * 100 - 100).toFixed(1)}% vs yesterday` : ''}
             changeColor="red"
           />
           {/* Card 2 */}
@@ -56,11 +85,11 @@ export default function Dashboard() {
             accentColor="red" 
             label="ACTIVE ANOMALIES" 
             icon={<LucideAlertTriangle className="w-[14px] h-[14px] text-red-500" />}
-            value={<div className="text-[40px] text-red-400 leading-tight flex items-center gap-2">7 <div className="w-2 h-2 bg-red-500 rounded-full animate-ping-custom mt-2"></div></div>}
+            value={<div className="text-[40px] text-red-400 leading-tight flex items-center gap-2">{stats?.anomalyCount || 0} <div className="w-2 h-2 bg-red-500 rounded-full animate-ping-custom mt-2"></div></div>}
             subRow={
               <div className="flex gap-2 mt-[6px]">
-                <Badge color="red">3 Critical</Badge>
-                <Badge color="amber">4 Warnings</Badge>
+                <Badge color="red">{criticalCount} Critical</Badge>
+                <Badge color="amber">{warningCount} Warnings</Badge>
               </div>
             }
           />
@@ -69,11 +98,11 @@ export default function Dashboard() {
             accentColor="blue" 
             label="AVG PER FLAT TODAY" 
             icon={<LucideBarChart2 className="w-[14px] h-[14px] text-blue-500" />}
-            value="16.9 kWh"
+            value={`${stats?.avgConsumption?.toFixed(1) || '--'} kWh`}
             subRow={
               <div className="mt-[10px]">
                 <div className="h-[4px] rounded-full bg-[rgba(55,65,81,0.5)] w-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500" style={{ width: '65%' }}></div>
+                  <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500" style={{ width: `${Math.min(100, (stats?.avgConsumption / 20) * 100)}%` }}></div>
                 </div>
                 <div className="text-[12px] text-gray-500 mt-2">Normal range: 12–20 kWh</div>
               </div>
@@ -84,10 +113,10 @@ export default function Dashboard() {
             accentColor="green" 
             label="NEXT HOUR FORECAST" 
             icon={<LucideTrendingUp className="w-[14px] h-[14px] text-green-500" />}
-            value="23.4 kWh"
+            value={`${prediction?.predicted_units_kWh?.toFixed(1) || '--'} kWh`}
             subRow={
               <div>
-                <div className="text-[12px] text-gray-400 mt-1">🔮 94% ML confidence</div>
+                <div className="text-[12px] text-gray-400 mt-1">🔮 {stats?.mlConfidence ? `${(stats.mlConfidence * 100).toFixed(0)}%` : '94%'} ML confidence</div>
                 <div className="text-[12px] text-gray-600 mt-1">Refreshes in 8 min</div>
               </div>
             }
@@ -164,19 +193,23 @@ export default function Dashboard() {
             <div className="my-3 mx-0 h-[1px] bg-gray-800"></div>
             
             <div className="px-4 pb-4 overflow-y-auto flex flex-col gap-2 custom-scrollbar">
-              {anomalyFeed.map((item, i) => (
-                <div key={i} className={`bg-level-3 border border-subtle rounded-md p-3 cursor-pointer hover:bg-level-4 transition-colors ${item.level === 'Critical' ? 'border-l-[3px] border-l-red-500 hover:border-l-red-400' : 'border-l-[3px] border-l-amber-500 hover:border-l-amber-400'}`}>
-                  <div className="flex justify-between items-start">
-                    <span className="text-[14px] font-bold text-white tracking-widest">{item.id}</span>
-                    <span className="font-mono text-[14px] font-semibold text-red-400">{item.kwh} kWh</span>
+              {anomalyFeed.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">✅ No anomalies detected</div>
+              ) : (
+                anomalyFeed.map((item) => (
+                  <div key={item._id} className={`bg-level-3 border border-subtle rounded-md p-3 cursor-pointer hover:bg-level-4 transition-colors ${item.level === 'Critical' ? 'border-l-[3px] border-l-red-500 hover:border-l-red-400' : 'border-l-[3px] border-l-amber-500 hover:border-l-amber-400'}`}>
+                    <div className="flex justify-between items-start">
+                      <span className="text-[14px] font-bold text-white tracking-widest">{item.id}</span>
+                      <span className="font-mono text-[14px] font-semibold text-red-400">{item.kwh} kWh</span>
+                    </div>
+                    <div className="text-[12px] text-gray-500 mt-1">{item.time}</div>
+                    <div className="flex justify-between items-center mt-2">
+                      <Badge color={item.level === 'Critical' ? 'red' : 'amber'}>{item.level}</Badge>
+                      <span className="text-[12px] text-gray-500 hover:text-blue-400">View →</span>
+                    </div>
                   </div>
-                  <div className="text-[12px] text-gray-500 mt-1">{item.time}</div>
-                  <div className="flex justify-between items-center mt-2">
-                    <Badge color={item.level === 'Critical' ? 'red' : 'amber'}>{item.level}</Badge>
-                    <span className="text-[12px] text-gray-500 hover:text-blue-400">View →</span>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
@@ -195,10 +228,12 @@ export default function Dashboard() {
 
             <div className="mt-6 flex flex-col items-center">
               <div>
-                <span className="text-[48px] font-mono font-extrabold text-green-500 leading-none">23.4</span>
+                <span className="text-[48px] font-mono font-extrabold text-green-500 leading-none">{prediction?.predicted_units_kWh?.toFixed(1) || '--'}</span>
                 <span className="text-[20px] text-gray-400 ml-2">kWh</span>
               </div>
-              <div className="text-[14px] text-gray-400 mt-2 text-center">Expected society-wide: 19:00 – 20:00 hrs</div>
+              <div className="text-[14px] text-gray-400 mt-2 text-center">
+                Expected society-wide: {prediction?.target_timestamp ? new Date(prediction.target_timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }) : '19:00'} hrs
+              </div>
             </div>
 
             <div className="mt-5">
@@ -216,7 +251,7 @@ export default function Dashboard() {
             <div>
               <div className="text-[12px] text-gray-500 font-semibold uppercase tracking-[0.08em] mb-3">TOP PREDICTED CONSUMERS — NEXT HOUR</div>
               <div className="flex flex-col gap-2">
-                {topPredicted.map((row, i) => (
+                {topPredicted.length > 0 ? topPredicted.map((row, i) => (
                   <div key={i} className="flex items-center gap-[10px]">
                     <span className="text-[12px] text-gray-300 font-mono w-[32px]">{row.id}</span>
                     <div className="flex-1 h-[6px] rounded-full bg-[rgba(55,65,81,0.4)] overflow-hidden">
@@ -224,11 +259,18 @@ export default function Dashboard() {
                     </div>
                     <span className="text-[12px] text-green-400 font-mono w-[48px] text-right">{row.kwh} kWh</span>
                   </div>
-                ))}
+                )) : (
+                  <div className="text-center text-gray-500 py-4 text-[12px]">No data available</div>
+                )}
               </div>
             </div>
           </div>
         </div>
+
+        <MemeAlertModal 
+          isOpen={newAnomalyDetected || showMeme}
+          onClose={() => setShowMeme(false)}
+        />
       </div>
     </DashboardLayout>
   );

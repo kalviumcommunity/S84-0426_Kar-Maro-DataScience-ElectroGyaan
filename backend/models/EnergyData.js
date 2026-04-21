@@ -1,7 +1,7 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const energyDataSchema = new mongoose.Schema({
-  userId: {
+  flatId: {
     type: String,
     required: true,
     default: 'A101'
@@ -18,12 +18,26 @@ const energyDataSchema = new mongoose.Schema({
   isAnomaly: {
     type: Boolean,
     default: false
+  },
+  mlConfidence: {
+    type: Number,
+    default: null
   }
+}, {
+  timestamps: false
 });
 
-// High performance compound indexing for fetching a user's time series data
-energyDataSchema.index({ userId: 1, timestamp: -1 });
+energyDataSchema.index({ flatId: 1, timestamp: -1 });
 
-const EnergyData = mongoose.model('EnergyData', energyDataSchema);
+energyDataSchema.virtual('deviationPercent').get(function() {
+  const baseline = 2.0;
+  if (this.units_kWh && baseline > 0) {
+    return ((this.units_kWh - baseline) / baseline * 100).toFixed(2);
+  }
+  return 0;
+});
 
-export default EnergyData;
+energyDataSchema.set('toJSON', { virtuals: true });
+energyDataSchema.set('toObject', { virtuals: true });
+
+module.exports = mongoose.model('EnergyData', energyDataSchema);

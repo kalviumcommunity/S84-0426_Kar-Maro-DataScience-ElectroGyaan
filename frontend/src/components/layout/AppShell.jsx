@@ -50,21 +50,21 @@ export default function AppShell() {
           <span className="text-[16px] font-bold">ElectroGyaan AI</span>
         </div>
 
-        {/* Society Card */}
-        <div className="m-[16px_12px] bg-level-2 border border-subtle rounded-md p-[12px] flex items-center justify-between cursor-pointer hover:border-gray-600 transition-colors">
+        {/* User Info Card */}
+        <div className="m-[16px_12px] bg-level-2 border border-subtle rounded-md p-[12px] flex items-center justify-between">
           <div className="flex items-center gap-[10px]">
             <div className="w-[36px] h-[36px] rounded-md bg-gradient-to-br from-blue-700 to-purple-600 flex items-center justify-center text-[14px] font-bold shadow-inner">
-              GM
+              {user?.name?.substring(0, 2).toUpperCase() || 'U'}
             </div>
             <div className="flex flex-col">
-              <span className="text-[14px] font-semibold text-white truncate max-w-[100px]">Green Meadows</span>
+              <span className="text-[14px] font-semibold text-white truncate max-w-[100px]">{user?.name || 'User'}</span>
               <div className="flex items-center gap-[6px] mt-1">
-                <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[12px] font-semibold px-[8px] py-[2px] rounded-full">Pro</span>
-                <span className="text-[12px] text-gray-500">50 units</span>
+                <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[12px] font-semibold px-[8px] py-[2px] rounded-full capitalize">
+                  {user?.role || 'user'}
+                </span>
               </div>
             </div>
           </div>
-          <LucideChevronDown className="w-[14px] h-[14px] text-gray-500" />
         </div>
 
         {/* Main Nav */}
@@ -118,11 +118,11 @@ export default function AppShell() {
         {/* Sidebar Footer (User) */}
         <div className="mt-auto border-t border-subtle bg-level-1 p-[16px_12px] flex items-center gap-[10px] shrink-0">
           <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[12px] font-bold text-white shadow-inner">
-            {user?.name?.substring(0, 2).toUpperCase() || 'SA'}
+            {user?.name?.substring(0, 2).toUpperCase() || 'U'}
           </div>
           <div className="flex flex-col flex-1">
-            <span className="text-[12px] font-semibold text-white">{user?.name || 'Suresh Admin'}</span>
-            <span className="text-[12px] text-gray-500 truncate max-w-[120px]">{user?.email || 'suresh@greenmeadows.in'}</span>
+            <span className="text-[12px] font-semibold text-white">{user?.name || 'User'}</span>
+            <span className="text-[12px] text-gray-500 truncate max-w-[120px]">{user?.email || 'user@example.com'}</span>
           </div>
           <button onClick={logout} className="text-gray-500 hover:text-red-400 transition-colors" title="Log Out">
             <LucideLogOut className="w-[16px] h-[16px]" />
@@ -137,7 +137,7 @@ export default function AppShell() {
         <div className="flex items-center">
           <span className="text-[16px] font-semibold text-white">Dashboard</span>
           <span className="text-gray-600 mx-[8px]">/</span>
-          <span className="text-[14px] text-gray-400">Green Meadows · A-Wing</span>
+          <span className="text-[14px] text-gray-400 capitalize">{user?.role || 'User'} View</span>
         </div>
 
         {/* Right: Actions */}
@@ -164,7 +164,7 @@ export default function AppShell() {
           {/* Topbar User Avatar Dropdown */}
           <div className="flex items-center gap-[4px] cursor-pointer border border-transparent hover:border-subtle p-1 rounded-md transition-colors">
             <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[12px] font-bold text-white shadow-inner">
-              {user?.name?.substring(0, 2).toUpperCase() || 'SA'}
+              {user?.name?.substring(0, 2).toUpperCase() || 'U'}
             </div>
             <LucideChevronDown className="w-[12px] h-[12px] text-gray-500" />
           </div>

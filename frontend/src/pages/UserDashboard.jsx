@@ -1,235 +1,202 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
+import apiClient from '../api/apiClient';
 import { 
-  LucideZap, LucideAlertTriangle, LucideBarChart2, LucideTrendingUp,
-  LucideUser
+  LucideZap, LucideAlertTriangle, LucideBarChart2, LucideTrendingUp
 } from 'lucide-react';
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Scatter, ComposedChart
-} from 'recharts';
+import { useEnergyData } from '../hooks/useEnergyData';
+import RealTimeChart from '../components/RealTimeChart';
+import AnomalyFeed from '../components/AnomalyFeed';
+import MemeAlertModal from '../components/MemeAlertModal';
 
-// Dummy data for demonstration
-const chartData = [
-  { time: '18:00', kwh: 12.1 },
-  { time: '18:15', kwh: 12.8 },
-  { time: '18:30', kwh: 13.2 },
-  { time: '18:45', kwh: 13.7, anomaly: true },
-  { time: '19:00', kwh: 14.1 },
-  { time: '19:15', kwh: 14.8 },
-  { time: '19:30', kwh: 15.2 },
-  { time: '19:45', kwh: 14.6 }
-];
+export default function UserDashboard() {
+  const { flatId } = useParams();
+  const userFlatId = flatId || 'A101';
+  const { energyData, stats, anomalies, prediction, hourlyPattern, loading, error, newAnomalyDetected } = useEnergyData(userFlatId);
+  const [showMeme, setShowMeme] = useState(false);
+  const [societyAvg, setSocietyAvg] = useState(0);
 
-const anomalyFeed = [
-  { kwh: '13.7', time: '18:45:12 · Today', level: 'Critical', message: 'Unusual spike detected' },
-  { kwh: '11.2', time: '18:32:07 · Today', level: 'Warning', message: 'Above average usage' },
-  { kwh: '14.9', time: '17:58:44 · Today', level: 'Critical', message: 'Peak consumption alert' },
-];
+  // Fetch society average from admin data
+  React.useEffect(() => {
+    const fetchSocietyAvg = async () => {
+      try {
+        const response = await apiClient.get('/api/energy/all-flats');
+        if (response.data.data && response.data.data.length > 0) {
+          const totalConsumption = response.data.data.reduce((sum, f) => sum + (f.units_kWh || 0), 0);
+          const avg = totalConsumption / response.data.data.length;
+          setSocietyAvg(avg);
+        }
+      } catch (err) {
+        console.error('Failed to fetch society average:', err);
+      }
+    };
+    fetchSocietyAvg();
+  }, []);
 
-function UserDashboard() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  if (loading && !stats) {
+    return (
+      <DashboardLayout>
+        <div className="p-8 bg-[#0A0F1E]">
+          <div className="flex gap-5">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="flex-1 bg-level-2 border border-subtle rounded-xl p-5 h-[140px] animate-pulse">
+                <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
+                <div className="h-8 bg-gray-700 rounded w-3/4"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
+  const myAvg = stats?.avgConsumption || 0;
+  const delta = myAvg > 0 && societyAvg > 0 ? ((myAvg / societyAvg - 1) * 100) : 0;
 
-  const chartUserId = user?.id || 'user-001';
+  const peakHours = hourlyPattern
+    .sort((a, b) => b.avgUnits - a.avgUnits)
+    .slice(0, 3)
+    .map(h => `${h.hour}:00`)
+    .join(', ');
+
+  const anomalyRate = stats?.recordCount > 0 
+    ? ((stats.anomalyCount / stats.recordCount) * 100).toFixed(1)
+    : 0;
 
   return (
     <DashboardLayout>
       <div className="p-8 bg-[#0A0F1E]">
-        {/* USER HEADER */}
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-[30px] font-semibold text-white">My Energy Dashboard</h1>
-            <p className="text-[14px] text-gray-400 mt-1">Monitor your apartment's energy consumption</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 bg-level-2 border border-subtle rounded-md px-4 py-2">
-              <LucideUser className="w-4 h-4 text-blue-400" />
-              <span className="text-[14px] text-gray-300">{user?.name}</span>
-            </div>
-            <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/30 rounded-md px-4 py-2">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse-custom"></span>
-              <span className="text-[14px] text-green-400 font-semibold">Active</span>
-            </div>
-          </div>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-white">My Apartment — {userFlatId}</h1>
+          <p className="text-gray-400 mt-1">Personal energy consumption dashboard</p>
         </div>
 
         {/* KPI CARDS ROW */}
-        <div className="flex flex-col lg:flex-row gap-5 w-full">
+        <div className="flex flex-col lg:flex-row gap-5 w-full mb-6">
+          {/* Card 1 */}
           <KPICard 
             accentColor="amber" 
-            label="TODAY'S CONSUMPTION" 
+            label="MY USAGE TODAY" 
             icon={<LucideZap className="w-[14px] h-[14px] text-amber-500" />}
-            value={<>16.9 <span className="text-[14px] text-gray-400 font-inter">kWh</span></>}
-            change="↑ +8.2% vs yesterday"
-            changeColor="red"
+            value={<>{stats?.totalConsumption?.toFixed(1) || '--'} <span className="text-[14px] text-gray-400 font-inter">kWh</span></>}
+            subText={`${stats?.recordCount || 0} readings`}
           />
+          {/* Card 2 */}
           <KPICard 
             accentColor="red" 
-            label="MY ANOMALIES" 
+            label="MY ANOMALIES THIS MONTH" 
             icon={<LucideAlertTriangle className="w-[14px] h-[14px] text-red-500" />}
-            value={<div className="text-[40px] text-red-400 leading-tight flex items-center gap-2">3 <div className="w-2 h-2 bg-red-500 rounded-full animate-ping-custom mt-2"></div></div>}
-            subRow={
-              <div className="flex gap-2 mt-[6px]">
-                <Badge color="red">2 Critical</Badge>
-                <Badge color="amber">1 Warning</Badge>
-              </div>
-            }
+            value={<div className="text-[40px] text-red-400 leading-tight flex items-center gap-2">{stats?.anomalyCount || 0} <div className="w-2 h-2 bg-red-500 rounded-full animate-ping-custom mt-2"></div></div>}
+            subText={`${anomalyRate}% anomaly rate`}
           />
+          {/* Card 3 */}
           <KPICard 
             accentColor="blue" 
-            label="THIS MONTH" 
+            label="MY AVG VS SOCIETY" 
             icon={<LucideBarChart2 className="w-[14px] h-[14px] text-blue-500" />}
-            value="423 kWh"
-            subRow={
-              <div className="mt-[10px]">
-                <div className="h-[4px] rounded-full bg-[rgba(55,65,81,0.5)] w-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500" style={{ width: '70%' }}></div>
-                </div>
-                <div className="text-[12px] text-gray-500 mt-2">70% of monthly average</div>
-              </div>
+            value={`${myAvg.toFixed(1)} kWh`}
+            subText={
+              delta > 0 
+                ? `↑ ${delta.toFixed(1)}% above average`
+                : `↓ ${Math.abs(delta).toFixed(1)}% below average`
             }
+            subTextColor={delta > 0 ? 'text-red-400' : 'text-green-400'}
           />
+          {/* Card 4 */}
           <KPICard 
             accentColor="green" 
-            label="NEXT HOUR FORECAST" 
+            label="MY NEXT HOUR FORECAST" 
             icon={<LucideTrendingUp className="w-[14px] h-[14px] text-green-500" />}
-            value="2.8 kWh"
-            subRow={
-              <div>
-                <div className="text-[12px] text-gray-400 mt-1">🔮 92% ML confidence</div>
-                <div className="text-[12px] text-gray-600 mt-1">Refreshes in 8 min</div>
-              </div>
-            }
+            value={`${prediction?.predicted_units_kWh?.toFixed(1) || '--'} kWh`}
+            subText="ML prediction"
           />
         </div>
 
         {/* MAIN CHART SECTION */}
-        <div className="mt-6 w-full bg-level-2 border border-subtle rounded-xl p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-[18px] font-semibold font-inter text-white">Real-Time Consumption Monitor</h2>
-              <p className="text-[14px] text-gray-400 mt-[2px]">Last 50 readings — your apartment</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex gap-1">
-                <TimePill label="1H" active />
-                <TimePill label="6H" />
-                <TimePill label="24H" />
-                <TimePill label="7D" />
-              </div>
-              <div className="flex items-center justify-center gap-[6px] bg-[rgba(16,185,129,0.08)] border border-[rgba(16,185,129,0.2)] rounded-full px-[10px] py-[3px]">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse-custom ring-4 ring-green-500/20"></span>
-                <span className="text-[12px] font-bold text-green-400">LIVE</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-5 h-[280px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorKwh" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="rgba(59,130,246,0.20)" stopOpacity={1}/>
-                    <stop offset="100%" stopColor="rgba(59,130,246,0.00)" stopOpacity={1}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="rgba(55,65,81,0.3)" />
-                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12, fontFamily: 'JetBrains Mono' }} dy={10} />
-                <YAxis domain={[0, 16]} ticks={[0, 4, 8, 12, 16]} axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12, fontFamily: 'JetBrains Mono' }} dx={-10} />
-                <Area type="monotone" dataKey="kwh" stroke="#3B82F6" strokeWidth={2} fillOpacity={1} fill="url(#colorKwh)" activeDot={{ r: 6 }} />
-                <Scatter data={chartData.filter(d => d.anomaly)} fill="#EF4444" shape={(props) => {
-                  const { cx, cy } = props;
-                  return (
-                    <g>
-                      <circle cx={cx} cy={cy} r={9} fill="none" stroke="#EF4444" strokeWidth={2} opacity={0.35} className="animate-ping-custom" />
-                      <circle cx={cx} cy={cy} r={5} fill="#EF4444" />
-                    </g>
-                  );
-                }} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
+        <div className="mb-6 w-full bg-level-2 border border-subtle rounded-xl p-6">
+          <RealTimeChart data={energyData} loading={loading} />
         </div>
 
         {/* BOTTOM ROW */}
-        <div className="mt-6 flex flex-col lg:flex-row gap-6 w-full">
+        <div className="flex flex-col lg:flex-row gap-6 w-full">
           {/* ANOMALY FEED */}
-          <div className="w-full lg:w-[380px] bg-level-2 border border-subtle rounded-lg h-[380px] flex flex-col overflow-hidden">
-            <div className="p-5 pb-0 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <LucideAlertTriangle className="w-4 h-4 text-red-500" />
-                <h3 className="text-[16px] font-semibold text-white">My Anomalies</h3>
-                <div className="bg-red-900/50 text-red-400 text-[12px] h-[20px] min-w-[20px] rounded-full flex items-center justify-center px-2 font-bold ml-1">3</div>
-              </div>
-              <button className="text-[12px] text-blue-400 hover:text-blue-300">View All →</button>
-            </div>
-            <div className="my-3 mx-0 h-[1px] bg-gray-800"></div>
-            
-            <div className="px-4 pb-4 overflow-y-auto flex flex-col gap-2 custom-scrollbar">
-              {anomalyFeed.map((item, i) => (
-                <div key={i} className={`bg-level-3 border border-subtle rounded-md p-3 cursor-pointer hover:bg-level-4 transition-colors ${item.level === 'Critical' ? 'border-l-[3px] border-l-red-500 hover:border-l-red-400' : 'border-l-[3px] border-l-amber-500 hover:border-l-amber-400'}`}>
-                  <div className="flex justify-between items-start">
-                    <span className="text-[14px] font-semibold text-white">{item.message}</span>
-                    <span className="font-mono text-[14px] font-semibold text-red-400">{item.kwh} kWh</span>
-                  </div>
-                  <div className="text-[12px] text-gray-500 mt-1">{item.time}</div>
-                  <div className="flex justify-between items-center mt-2">
-                    <Badge color={item.level === 'Critical' ? 'red' : 'amber'}>{item.level}</Badge>
-                    <span className="text-[12px] text-gray-500 hover:text-blue-400">View →</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="w-full lg:w-[380px] bg-level-2 border border-subtle rounded-lg h-[380px] p-5">
+            <AnomalyFeed anomalies={anomalies} loading={loading} />
           </div>
 
-          {/* INSIGHTS WIDGET */}
+          {/* ML INSIGHTS BOX */}
           <div className="flex-1 bg-level-2 border border-subtle rounded-lg h-[380px] p-6">
-            <div className="flex justify-between font-inter">
-              <div>
-                <div className="flex items-center gap-2">
-                  <LucideTrendingUp className="w-4 h-4 text-green-500" />
-                  <span className="text-[16px] font-semibold text-white">Energy Insights</span>
-                </div>
-                <div className="text-[12px] text-gray-400 mt-[2px]">Personalized recommendations</div>
-              </div>
+            <div className="mb-4">
+              <h3 className="text-[18px] font-semibold text-white flex items-center gap-2">
+                💡 ML Insights
+              </h3>
+              <p className="text-[12px] text-gray-400">Personalized energy analytics</p>
             </div>
 
-            <div className="mt-6 space-y-4">
-              <InsightCard 
-                icon="💡"
-                title="Peak Usage Alert"
-                description="Your consumption peaks between 6-8 PM. Consider shifting heavy appliance usage to off-peak hours."
-                type="tip"
-              />
-              <InsightCard 
-                icon="📊"
-                title="Monthly Comparison"
-                description="You're using 15% less energy than last month. Great job!"
-                type="success"
-              />
-              <InsightCard 
-                icon="⚡"
-                title="Forecast"
-                description="Expected usage for next hour: 2.8 kWh (within normal range)"
-                type="info"
-              />
+            <div className="space-y-4">
+              <div className="bg-level-3 rounded-lg p-4">
+                <div className="text-[12px] text-gray-500 mb-2">Peak Usage Hours</div>
+                <div className="text-[16px] font-semibold text-blue-400">
+                  {peakHours || 'Analyzing...'}
+                </div>
+                <div className="text-[12px] text-gray-400 mt-1">
+                  Based on your usage pattern
+                </div>
+              </div>
+
+              <div className="bg-level-3 rounded-lg p-4">
+                <div className="text-[12px] text-gray-500 mb-2">Anomaly Detection Rate</div>
+                <div className="text-[16px] font-semibold text-amber-400">
+                  {anomalyRate}%
+                </div>
+                <div className="text-[12px] text-gray-400 mt-1">
+                  IsolationForest flagged {stats?.anomalyCount || 0} suspicious readings
+                </div>
+              </div>
+
+              <div className="bg-level-3 rounded-lg p-4">
+                <div className="text-[12px] text-gray-500 mb-2">Last Reading</div>
+                <div className="text-[16px] font-semibold text-green-400">
+                  {stats?.lastReading?.units_kWh?.toFixed(3) || '--'} kWh
+                </div>
+                <div className="text-[12px] text-gray-400 mt-1">
+                  {stats?.lastReading?.timestamp 
+                    ? new Date(stats.lastReading.timestamp).toLocaleString('en-IN')
+                    : 'No data'}
+                </div>
+              </div>
+
+              <div className="bg-level-3 rounded-lg p-4">
+                <div className="text-[12px] text-gray-500 mb-2">Consumption Trend</div>
+                <div className="flex items-center gap-2">
+                  {delta > 0 ? (
+                    <>
+                      <span className="text-[16px] font-semibold text-red-400">↑ Above Average</span>
+                      <div className="text-[12px] text-gray-400">Consider reducing usage</div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-[16px] font-semibold text-green-400">↓ Below Average</span>
+                      <div className="text-[12px] text-gray-400">Great energy efficiency!</div>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
+        <MemeAlertModal 
+          isOpen={newAnomalyDetected || showMeme}
+          onClose={() => setShowMeme(false)}
+        />
       </div>
     </DashboardLayout>
   );
 }
 
-// Subcomponents
-const KPICard = ({ accentColor, label, icon, value, change, changeColor, subRow }) => {
+const KPICard = ({ accentColor, label, icon, value, subText, subTextColor }) => {
   const getGradient = () => {
     if (accentColor === 'amber') return 'from-[#F59E0B] to-[#D97706]';
     if (accentColor === 'red') return 'from-[#EF4444] to-[#B91C1C]';
@@ -264,62 +231,9 @@ const KPICard = ({ accentColor, label, icon, value, change, changeColor, subRow 
         {value}
       </div>
 
-      {change && (
-        <div className="flex items-center gap-1 mt-[6px]">
-          <span className={`text-[12px] font-semibold ${changeColor === 'red' ? 'text-red-500' : 'text-green-500'}`}>{change}</span>
-        </div>
+      {subText && (
+        <div className={`text-[12px] mt-2 ${subTextColor || 'text-gray-400'}`}>{subText}</div>
       )}
-
-      {subRow}
     </div>
   );
 };
-
-const TimePill = ({ label, active }) => {
-  return (
-    <button className={`h-[30px] px-3 rounded-md text-[12px] font-semibold font-inter transition-colors ${
-      active 
-      ? 'bg-[rgba(37,99,235,0.2)] text-blue-400 border border-[rgba(59,130,246,0.3)]' 
-      : 'bg-level-1 text-gray-400 border border-transparent hover:text-gray-200'
-    }`}>
-      {label}
-    </button>
-  );
-};
-
-const Badge = ({ color, children }) => {
-  if (color === 'red') {
-    return <span className="bg-[#450A0A] text-red-400 border border-[#991B1B] h-[22px] px-[10px] py-[3px] rounded-full text-[12px] font-bold uppercase tracking-[0.06em] flex items-center justify-center">
-      {children}
-    </span>;
-  }
-  if (color === 'amber') {
-    return <span className="bg-[#431407] text-amber-400 border border-[#92400E] h-[22px] px-[10px] py-[3px] rounded-full text-[12px] font-bold uppercase tracking-[0.06em] flex items-center justify-center">
-      {children}
-    </span>;
-  }
-  return null;
-};
-
-const InsightCard = ({ icon, title, description, type }) => {
-  const getBgClass = () => {
-    if (type === 'tip') return 'bg-amber-500/10 border-amber-500/30';
-    if (type === 'success') return 'bg-green-500/10 border-green-500/30';
-    if (type === 'info') return 'bg-blue-500/10 border-blue-500/30';
-    return 'bg-level-3 border-subtle';
-  };
-
-  return (
-    <div className={`p-4 rounded-md border ${getBgClass()}`}>
-      <div className="flex items-start gap-3">
-        <span className="text-[24px]">{icon}</span>
-        <div className="flex-1">
-          <div className="text-[14px] font-semibold text-white">{title}</div>
-          <div className="text-[12px] text-gray-400 mt-1">{description}</div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default UserDashboard;

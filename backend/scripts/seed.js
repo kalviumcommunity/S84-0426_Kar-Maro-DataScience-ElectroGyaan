@@ -1,130 +1,93 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import fs from 'fs';
-import path from 'path';
-import csv from 'csv-parser';
-import bcrypt from 'bcrypt';
-import connectDB from '../config/db.js';
-import EnergyData from '../models/EnergyData.js';
-import User from '../models/User.js';
-import { fileURLToPath } from 'url';
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+const mongoose = require('mongoose');
+const EnergyData = require('../models/EnergyData');
 
-// Resolve __dirname in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const MONGO_URI = process.env.MONGO_URI;
+const FLATS = Array.from({ length: 50 }, (_, i) => `A${101 + i}`);
+const HOURS_OF_HISTORY = 24;
 
-dotenv.config();
+// Unique base multiplier per flat so each has a different consumption profile
+const FLAT_PROFILES = {};
+FLATS.forEach(id => {
+  FLAT_PROFILES[id] = {
+    baseMultiplier: 0.6 + Math.random() * 0.8,
+    spikeProbability: 0.03 + Math.random() * 0.07
+  };
+});
 
-const CSV_FILE_PATH = path.join(__dirname, '../../ml-service/data/electrogyaan_dataset - electrogyaan_dataset.csv');
+function getBaseConsumption(hour) {
+  if (hour >= 0 && hour < 6)   return 0.3 + Math.random() * 0.7;
+  if (hour >= 6 && hour < 10)  return 1.5 + Math.random() * 1.5;
+  if (hour >= 10 && hour < 17) return 1.0 + Math.random() * 1.5;
+  if (hour >= 17 && hour < 23) return 3.0 + Math.random() * 2.0;
+  return 1.0 + Math.random() * 1.0;
+}
 
-const seedData = async () => {
-  try {
-    await connectDB();
+function addNoise(v) {
+  return Math.max(0.1, v + (Math.random() - 0.5) * 0.3);
+}
 
-    console.log('🧹 Clearing existing EnergyData and Users...');
-    await EnergyData.deleteMany({});
-    await User.deleteMany({});
+async function seed() {
+  console.log('\x1b[36m🌱 ElectroGyaan Seed Script\x1b[0m');
+  console.log(`\x1b[36m   Connecting to MongoDB...\x1b[0m`);
 
-    const recordsByFlat = {};
-    const flatIds = new Set();
+  await mongoose.connect(MONGO_URI);
+  console.log('\x1b[32m✓ Connected\x1b[0m');
 
-    console.log('📖 Reading CSV data...');
-    await new Promise((resolve, reject) => {
-      fs.createReadStream(CSV_FILE_PATH)
-        .pipe(csv())
-        .on('data', (data) => {
-          const flatId = data.flat_id;
-          if (!flatId) return; // Skip empty rows
-          
-          flatIds.add(flatId);
-          if (!recordsByFlat[flatId]) {
-            recordsByFlat[flatId] = [];
-          }
-          
-          recordsByFlat[flatId].push({
-            units_kWh: parseFloat(data.units_kWh) || 0,
-            isAnomaly: data.is_anomaly === 'TRUE' || data.is_anomaly === 'true'
-          });
-        })
-        .on('end', resolve)
-        .on('error', reject);
-    });
+  // Remove old data for all 50 flats
+  const deleted = await EnergyData.deleteMany({ flatId: { $in: FLATS } });
+  console.log(`\x1b[33m  Cleared ${deleted.deletedCount} old records\x1b[0m`);
 
-    const uniqueFlats = Array.from(flatIds);
-    console.log(`✅ Found ${uniqueFlats.length} unique flats.`);
+  const records = [];
+  const now = Date.now();
 
-    console.log('🔐 Generating secure users...');
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash('12345678', salt);
+  for (const flatId of FLATS) {
+    const profile = FLAT_PROFILES[flatId];
 
-    const usersToInsert = [];
+    // One reading per 5 minutes for HOURS_OF_HISTORY hours = 288 readings per flat
+    const totalReadings = (HOURS_OF_HISTORY * 60) / 5;
 
-    // 1. Create one Admin User
-    usersToInsert.push({
-      name: 'Admin',
-      email: 'admin@electrogyaan.com',
-      password: hashedPassword,
-      role: 'admin'
-    });
+    for (let i = totalReadings; i >= 0; i--) {
+      const timestamp = new Date(now - i * 5 * 60 * 1000);
+      const hour = timestamp.getHours();
+      const isSpike = Math.random() < profile.spikeProbability;
 
-    // 2. Create Flat Users
-    for (const flatId of uniqueFlats) {
-      usersToInsert.push({
-        name: flatId,
-        email: `${flatId.toLowerCase()}@gmail.com`,
-        password: hashedPassword,
-        role: 'user'
+      let units_kWh;
+      if (isSpike) {
+        units_kWh = parseFloat((10 + Math.random() * 8).toFixed(3));
+      } else {
+        units_kWh = parseFloat(
+          addNoise(getBaseConsumption(hour) * profile.baseMultiplier).toFixed(3)
+        );
+      }
+
+      records.push({
+        flatId,
+        timestamp,
+        units_kWh,
+        isAnomaly: isSpike,
+        mlConfidence: isSpike ? parseFloat((0.7 + Math.random() * 0.3).toFixed(2)) : null
       });
     }
-
-    await User.insertMany(usersToInsert);
-    console.log(`✅ Inserted ${usersToInsert.length} users successfully!`);
-
-    console.log('⏳ Shifting timestamps to 30 days from now and mapping records...');
-    const energyRecordsToInsert = [];
-    const now = new Date();
-    // Set minutes and seconds to 0 to align to exact hours
-    now.setMinutes(0, 0, 0);
-
-    for (const flatId of uniqueFlats) {
-      const records = recordsByFlat[flatId];
-      const totalRecords = records.length;
-      
-      // We want to span 30 days exactly (720 hours)
-      const targetRecords = Math.min(totalRecords, 30 * 24);
-      const startIndex = totalRecords - targetRecords;
-
-      for (let i = 0; i < targetRecords; i++) {
-        // Shift time backwards from now, up to 720 hours ago
-        const hoursAgo = targetRecords - 1 - i;
-        const timestamp = new Date(now.getTime() - (hoursAgo * 60 * 60 * 1000));
-        
-        const record = records[startIndex + i];
-
-        energyRecordsToInsert.push({
-          userId: flatId, // This maps correctly so Admin Dashboard displays "A101"
-          timestamp: timestamp,
-          units_kWh: record.units_kWh,
-          isAnomaly: record.isAnomaly
-        });
-      }
-    }
-
-    console.log(`📦 Bulk inserting ${energyRecordsToInsert.length} energy records...`);
-    // Insert in batches of 5000 to prevent memory exhaustion
-    const batchSize = 5000;
-    for (let i = 0; i < energyRecordsToInsert.length; i += batchSize) {
-      const batch = energyRecordsToInsert.slice(i, i + batchSize);
-      await EnergyData.insertMany(batch);
-      console.log(`   - Inserted batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(energyRecordsToInsert.length/batchSize)}`);
-    }
-
-    console.log('✅ Entire Database Seeding from CSV completed successfully!');
-    process.exit(0);
-  } catch (error) {
-    console.error(`❌ Seeding failed:`, error);
-    process.exit(1);
   }
-};
 
-seedData();
+  console.log(`\x1b[36m  Inserting ${records.length} records for ${FLATS.length} flats...\x1b[0m`);
+
+  // Batch insert in chunks of 5000
+  const BATCH = 5000;
+  for (let i = 0; i < records.length; i += BATCH) {
+    await EnergyData.insertMany(records.slice(i, i + BATCH), { ordered: false });
+    process.stdout.write(`\r\x1b[32m  Inserted ${Math.min(i + BATCH, records.length)} / ${records.length}\x1b[0m`);
+  }
+
+  console.log('\n\x1b[32m✓ Seed complete!\x1b[0m');
+  console.log(`\x1b[36m  ${FLATS.length} flats × ~${(HOURS_OF_HISTORY * 60) / 5} readings = ${records.length} total records\x1b[0m`);
+
+  await mongoose.disconnect();
+  process.exit(0);
+}
+
+seed().catch(err => {
+  console.error('\x1b[31m✗ Seed failed:\x1b[0m', err.message);
+  process.exit(1);
+});

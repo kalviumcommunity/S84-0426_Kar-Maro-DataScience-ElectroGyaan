@@ -1,68 +1,75 @@
-import axios from 'axios';
+require('dotenv').config();
+const axios = require('axios');
 
-const NUM_USERS = 50;
-const INTERVAL_MS = 10000; // Generate data every 10 seconds -> simulating 1 hour
+// All 50 flats A101–A150
+const FLATS = Array.from({ length: 50 }, (_, i) => `A${101 + i}`);
 
-// The backend must be running for this simulator to hit its API
-const INGEST_API_URL = 'http://localhost:5000/api/energy/ingest';
+const INTERVAL_MS = 5000;       // one full cycle every 5s
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 
-// Simulate realistic hour-of-day progression. Starts at hour 0 (Midnight).
-let currentSimulatedHour = 0;
+// Each flat gets a stable "base multiplier" so they feel like different households
+const FLAT_PROFILES = {};
+FLATS.forEach(id => {
+  FLAT_PROFILES[id] = {
+    baseMultiplier: 0.6 + Math.random() * 0.8,   // 0.6x – 1.4x of base
+    spikeProbability: 0.03 + Math.random() * 0.07 // 3% – 10% spike chance
+  };
+});
 
-function generateHourlyUsage(hour) {
-  let base;
-  if (hour >= 7 && hour <= 9) {
-    base = 2.5; // Morning peak
-  } else if (hour >= 18 && hour <= 22) {
-    base = 4.0; // Evening peak
-  } else {
-    base = 0.5; // Base load
-  }
-  
-  const variance = base * 0.2;
-  const noise = (Math.random() * variance * 2) - variance;
-  let usage = Math.max(0, parseFloat((base + noise).toFixed(3)));
-
-  // Random arbitrary spike (3% chance) for the ML model to catch as anomaly
-  if (Math.random() < 0.03) {
-    usage = parseFloat((usage * (Math.random() * 3 + 2)).toFixed(3)); // 2x to 5x spike
-  }
-
-  return usage;
+function getBaseConsumption(hour) {
+  if (hour >= 0 && hour < 6)   return 0.3 + Math.random() * 0.7;   // night
+  if (hour >= 6 && hour < 10)  return 1.5 + Math.random() * 1.5;   // morning rush
+  if (hour >= 10 && hour < 17) return 1.0 + Math.random() * 1.5;   // daytime
+  if (hour >= 17 && hour < 23) return 3.0 + Math.random() * 2.0;   // evening peak
+  return 1.0 + Math.random() * 1.0;
 }
 
-const simulateRealTimeData = async () => {
-  console.log(`⏱️ Starting Simulator: 1 hour in simulation = ${INTERVAL_MS/1000} seconds real-time...`);
+function addNoise(value) {
+  return Math.max(0.1, value + (Math.random() - 0.5) * 0.3);
+}
 
-  setInterval(async () => {
-    console.log(`\n⏳ Simulating Hour: ${currentSimulatedHour}`);
-    let successes = 0;
+function getTimeString() {
+  return new Date().toTimeString().split(' ')[0];
+}
 
-    // Fire 50 asynchronous requests to the INGEST API
-    const requests = [];
-    
-    for (let u = 1; u <= NUM_USERS; u++) {
-      const userId = `user-${u.toString().padStart(3, '0')}`;
-      const units_kWh = generateHourlyUsage(currentSimulatedHour);
-      
-      const simulateTime = new Date(); // Stamp it with current real time
+async function simulateFlat(flatId) {
+  const profile = FLAT_PROFILES[flatId];
+  const hour = new Date().getHours();
+  const isSpike = Math.random() < profile.spikeProbability;
 
-      requests.push(
-        axios.post(INGEST_API_URL, {
-          userId,
-          units_kWh,
-          timestamp: simulateTime
-        }).then(() => successes++).catch(err => console.error(`[${userId}] Error: ${err.message}`))
-      );
+  let units;
+  if (isSpike) {
+    units = parseFloat((10 + Math.random() * 8).toFixed(3)); // 10–18 kWh spike
+  } else {
+    units = parseFloat(
+      addNoise(getBaseConsumption(hour) * profile.baseMultiplier).toFixed(3)
+    );
+  }
+
+  try {
+    await axios.post(`${BACKEND_URL}/api/energy/ingest`, { flatId, units });
+
+    if (isSpike) {
+      console.log(`\x1b[31m⚡ [${getTimeString()}] ${flatId} — ${units.toFixed(3)} kWh — SPIKE\x1b[0m`);
+    } else {
+      console.log(`\x1b[32m✓  [${getTimeString()}] ${flatId} — ${units.toFixed(3)} kWh\x1b[0m`);
     }
+  } catch (error) {
+    console.log(`\x1b[33m✗  [${getTimeString()}] ${flatId} ingest failed: ${error.message}\x1b[0m`);
+  }
+}
 
-    await Promise.all(requests);
-    console.log(`✅ Ingested ${successes}/${NUM_USERS} records. Next payload in ${INTERVAL_MS/1000}s.`);
+async function runCycle() {
+  // Send all 50 flats in parallel each cycle
+  await Promise.allSettled(FLATS.map(id => simulateFlat(id)));
+}
 
-    // Progress the simulated hour.
-    currentSimulatedHour = (currentSimulatedHour + 1) % 24;
+console.log('\x1b[36m🔌 ElectroGyaan IoT Simulator Started\x1b[0m');
+console.log(`\x1b[36m   Flats: ${FLATS.length} (${FLATS[0]}–${FLATS[FLATS.length - 1]})\x1b[0m`);
+console.log(`\x1b[36m   Cycle interval: ${INTERVAL_MS}ms\x1b[0m`);
+console.log(`\x1b[36m   Backend: ${BACKEND_URL}\x1b[0m`);
+console.log('');
 
-  }, INTERVAL_MS);
-};
-
-simulateRealTimeData();
+// Run immediately then every INTERVAL_MS
+runCycle();
+setInterval(runCycle, INTERVAL_MS);

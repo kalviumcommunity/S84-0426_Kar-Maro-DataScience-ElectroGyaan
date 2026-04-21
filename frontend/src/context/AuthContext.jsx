@@ -13,8 +13,11 @@ export const AuthProvider = ({ children }) => {
         const response = await energyApi.getMe();
         if (response.success) {
           setUser(response.data);
+        } else {
+          setUser(null);
         }
       } catch (error) {
+        // Silent fail - user is not logged in
         setUser(null);
       } finally {
         setLoading(false);
@@ -29,7 +32,7 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data);
       return { success: true };
     }
-    return response;
+    throw new Error(response.message || 'Login failed');
   };
 
   const signUp = async (name, email, password) => {
@@ -38,7 +41,7 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data);
       return { success: true };
     }
-    return response;
+    throw new Error(response.message || 'Signup failed');
   };
 
   const googleLogin = async (token) => {
@@ -47,17 +50,22 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data);
       return { success: true };
     }
-    return response;
+    throw new Error(response.message || 'Google login failed');
   };
 
   const logout = async () => {
-    await energyApi.logout();
-    setUser(null);
+    try {
+      await energyApi.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+    }
   };
 
   return (
     <AuthContext.Provider value={{ user, login, signUp, logout, googleLogin, loading }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

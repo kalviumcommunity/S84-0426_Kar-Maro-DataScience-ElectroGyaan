@@ -1,14 +1,31 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LucideLayoutDashboard, LucideActivity, LucideAlertTriangle, LucideTrendingUp, LucideBuilding2, LucideFileText, LucideSettings, LucideHelpCircle, LucideLogOut, LucideChevronDown, LucideBell } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const Topbar = () => {
+  const { user } = useAuth();
+  const location = useLocation();
+  
+  // Get page title from current route
+  const getPageTitle = () => {
+    const path = location.pathname;
+    if (path === '/dashboard') return 'Dashboard';
+    if (path === '/admin') return 'Admin Dashboard';
+    if (path.startsWith('/user/')) return 'User Dashboard';
+    if (path === '/apartments') return 'Apartments';
+    if (path === '/anomalies') return 'Anomaly Log';
+    if (path === '/reports') return 'Reports';
+    if (path === '/settings') return 'Settings';
+    return 'Dashboard';
+  };
+
   return (
     <div className="fixed left-[240px] right-0 top-0 h-[64px] bg-[rgba(10,15,30,0.9)] backdrop-blur-[12px] border-b border-subtle px-8 flex justify-between items-center z-50">
       <div className="flex items-center text-sm">
-        <span className="text-[16px] font-semibold text-white">Dashboard</span>
+        <span className="text-[16px] font-semibold text-white">{getPageTitle()}</span>
         <span className="text-gray-600 mx-2">/</span>
-        <span className="text-[14px] text-gray-400">Green Meadows · A-Wing</span>
+        <span className="text-[14px] text-gray-400 capitalize">{user?.role || 'User'} View</span>
       </div>
 
       <div className="flex items-center gap-4">
@@ -31,7 +48,7 @@ const Topbar = () => {
 
         <div className="flex items-center gap-2 cursor-pointer">
           <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[12px] text-white font-semibold">
-            SA
+            {user?.name?.substring(0, 2).toUpperCase() || 'U'}
           </div>
           <LucideChevronDown className="w-[12px] h-[12px] text-gray-500" />
         </div>
@@ -41,6 +58,14 @@ const Topbar = () => {
 };
 
 const Sidebar = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   return (
     <div className="fixed left-0 top-0 h-screen w-[240px] bg-level-1 border-r border-subtle flex flex-col overflow-y-auto">
       {/* Header */}
@@ -49,19 +74,19 @@ const Sidebar = () => {
         <span className="text-[16px] font-bold text-white tracking-tight">ElectroGyaan AI</span>
       </div>
 
-      {/* Society Card */}
-      <div className="m-[16px_12px] bg-level-2 border border-subtle rounded-md p-3 flex items-center gap-[10px] cursor-pointer hover:border-strong transition-colors">
+      {/* User Info Card */}
+      <div className="m-[16px_12px] bg-level-2 border border-subtle rounded-md p-3 flex items-center gap-[10px]">
         <div className="w-[36px] h-[36px] rounded-md bg-gradient-to-br from-blue-700 to-purple-600 flex justify-center items-center text-[14px] font-bold text-white shrink-0">
-          GM
+          {user?.name?.substring(0, 2).toUpperCase() || 'U'}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[14px] font-semibold text-white truncate">Green Meadows</div>
+          <div className="text-[14px] font-semibold text-white truncate">{user?.name || 'User'}</div>
           <div className="flex items-center gap-[6px] mt-[2px]">
-            <span className="bg-[rgba(245,158,11,0.1)] border border-[rgba(245,158,11,0.3)] text-[12px] font-semibold text-amber-400 px-[8px] py-[2px] rounded-full">Pro</span>
-            <span className="text-[12px] text-gray-500">50 units</span>
+            <span className="bg-[rgba(245,158,11,0.1)] border border-[rgba(245,158,11,0.3)] text-[12px] font-semibold text-amber-400 px-[8px] py-[2px] rounded-full capitalize">
+              {user?.role || 'user'}
+            </span>
           </div>
         </div>
-        <LucideChevronDown className="w-[14px] h-[14px] text-gray-500 shrink-0" />
       </div>
 
       {/* Nav */}
@@ -69,14 +94,25 @@ const Sidebar = () => {
         <div className="text-[12px] text-gray-600 font-semibold uppercase tracking-[0.1em] p-[16px_12px_6px]">MAIN</div>
         <nav className="flex flex-col gap-[2px]">
           <NavItem to="/dashboard" icon={<LucideLayoutDashboard className="w-4 h-4" />} label="Dashboard" />
-          <NavItem icon={<LucideActivity className="w-4 h-4" />} label="Live Monitor" />
-          <NavItem to="/anomalies" icon={<LucideAlertTriangle className="w-4 h-4" />} label="Anomaly Log" badge="7" />
-          <NavItem icon={<LucideTrendingUp className="w-4 h-4" />} label="Predictions" />
-          <NavItem to="/apartments" icon={<LucideBuilding2 className="w-4 h-4" />} label="Apartments" />
-          <NavItem to="/reports" icon={<LucideFileText className="w-4 h-4" />} label="Reports" />
+          
+          {/* Admin-only navigation */}
+          {user?.role === 'admin' && (
+            <>
+              <NavItem to="/apartments" icon={<LucideBuilding2 className="w-4 h-4" />} label="Apartments" />
+              <NavItem to="/anomalies" icon={<LucideAlertTriangle className="w-4 h-4" />} label="Anomaly Log" />
+              <NavItem to="/reports" icon={<LucideFileText className="w-4 h-4" />} label="Reports" />
+            </>
+          )}
+          
+          {/* User-only navigation */}
+          {user?.role === 'user' && (
+            <>
+              <NavItem to="/anomalies" icon={<LucideAlertTriangle className="w-4 h-4" />} label="My Anomalies" />
+            </>
+          )}
+          
           <div className="h-[1px] bg-gray-800 my-[8px] mx-[12px]"></div>
           <NavItem to="/settings" icon={<LucideSettings className="w-4 h-4" />} label="Settings" />
-          <NavItem icon={<LucideHelpCircle className="w-4 h-4" />} label="Help & Docs" />
         </nav>
       </div>
 
@@ -84,15 +120,19 @@ const Sidebar = () => {
       <div className="p-[16px_12px] border-t border-subtle bg-level-1 mt-auto">
         <div className="flex items-center gap-[10px]">
           <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[12px] text-white shrink-0">
-            SA
+            {user?.name?.substring(0, 2).toUpperCase() || 'U'}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[12px] font-semibold text-white">Suresh Admin</div>
-            <div className="text-[12px] text-gray-500 truncate max-w-[140px]">suresh@greenmeadows.in</div>
+            <div className="text-[12px] font-semibold text-white truncate">{user?.name || 'User'}</div>
+            <div className="text-[12px] text-gray-500 truncate max-w-[140px]">{user?.email || 'user@example.com'}</div>
           </div>
-          <Link to="/" className="w-[16px] h-[16px] text-gray-500 hover:text-red-400 cursor-pointer shrink-0 transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="w-[16px] h-[16px] text-gray-500 hover:text-red-400 cursor-pointer shrink-0 transition-colors"
+            title="Logout"
+          >
             <LucideLogOut className="w-[16px] h-[16px]" />
-          </Link>
+          </button>
         </div>
       </div>
     </div>
