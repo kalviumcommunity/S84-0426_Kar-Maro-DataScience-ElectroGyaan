@@ -1,87 +1,122 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { GoogleLogin } from '@react-oauth/google';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-    const res = await login(email, password);
-    if (res.success) {
-      const userRes = res.data;
-      if (userRes && userRes.role === 'admin') navigate('/admin/dashboard');
-      else navigate('/user/dashboard');
-    } else {
-      setError(res.message);
+    try {
+      setError("");
+      setLoading(true);
+      await login(email, password);
+      // Let protected route handle redirect natively
+    } catch (err) {
+      setError("Failed to sign in: " + (err.response?.data?.message || err.message));
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    const res = await googleLogin(credentialResponse.credential);
-    if (res.success) {
-      const userRes = res.data;
-      if (userRes && userRes.role === 'admin') navigate('/admin/dashboard');
-      else navigate('/user/dashboard');
-    } else {
-      setError(res.message);
+    try {
+      setError("");
+      setLoading(true);
+      await googleLogin(credentialResponse.credential);
+    } catch (err) {
+      setError("Google sign-in failed: " + (err.response?.data?.message || err.message));
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex h-screen bg-neutral-900 justify-center items-center font-sans">
-      <div className="bg-neutral-800 p-8 rounded-xl border border-neutral-700 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-emerald-400 mb-6 text-center">ElectroGyaan Login</h2>
+    <div className="min-h-screen w-full flex bg-level-0">
+      {/* Left Pane: Marketing Wrapper */}
+      <div className="hidden lg:flex w-[60%] flex-col justify-center items-center relative overflow-hidden bg-level-1">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 to-level-0 z-0"></div>
+        {/* Abstract floating mesh-like shapes */}
+        <div className="absolute top-[20%] left-[20%] w-96 h-96 bg-blue-500/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+        <div className="absolute bottom-[20%] right-[20%] w-80 h-80 bg-amber-500/10 rounded-full blur-[100px] animate-ping-slow"></div>
         
-        {error && <div className="bg-rose-500/20 text-rose-400 p-3 rounded mb-4 text-sm">{error}</div>}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm text-neutral-300 mb-1">Email</label>
-            <input 
-              type="email" 
-              className="w-full bg-neutral-700 border border-neutral-600 rounded p-2 text-white outline-none focus:border-emerald-500"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-neutral-300 mb-1">Password</label>
-            <input 
-              type="password" 
-              className="w-full bg-neutral-700 border border-neutral-600 rounded p-2 text-white outline-none focus:border-emerald-500"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <button 
-            type="submit" 
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 rounded transition-colors"
-          >
-            Log In
-          </button>
-        </form>
-
-        <div className="mt-6 flex flex-col items-center justify-center space-y-4">
-          <span className="text-neutral-500 text-sm">-- OR --</span>
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => {
-              setError('Google Login Failed');
-            }}
-          />
+        <div className="relative z-10 text-center px-12">
+          <h1 className="text-display-xl text-white mb-6 tracking-tight">ElectroGyaan <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">AI</span></h1>
+          <p className="text-text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            Real-time smart energy analytics SaaS platform. Monitor consumption, detect anomalies, and track carbon emissions effortlessly.
+          </p>
         </div>
+      </div>
 
-        <p className="text-neutral-400 text-sm text-center mt-6">
-          Don't have an account? <Link to="/signup" className="text-emerald-400 hover:underline">Sign up</Link>
-        </p>
+      {/* Right Pane: Auth Form */}
+      <div className="w-full lg:w-[40%] flex justify-center items-center p-8 z-10 relative">
+        <div className="w-full max-w-[420px] bg-level-1/50 backdrop-blur-xl p-8 rounded-2xl border border-subtle shadow-card-mockup">
+          <h2 className="text-display-sm text-white mb-2">Welcome Back</h2>
+          <p className="text-text-sm text-gray-400 mb-8">Please enter your details to sign in.</p>
+          
+          {error && <div className="mb-6 p-4 bg-red-900/20 border border-red-500/30 rounded-md text-red-400 text-sm">{error}</div>}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-text-sm text-gray-300 font-medium">Email Address</label>
+              <input 
+                type="email" 
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full h-[48px] bg-level-2 border border-subtle rounded-md px-4 text-white text-text-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                placeholder="Enter your email"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-text-sm text-gray-300 font-medium">Password</label>
+                <a href="#" className="text-text-xs text-blue-400 hover:text-blue-300 transition-colors">Forgot Password?</a>
+              </div>
+              <input 
+                type="password" 
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full h-[48px] bg-level-2 border border-subtle rounded-md px-4 text-white text-text-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <button disabled={loading} type="submit" className="w-full btn-primary mt-2">
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
+          </form>
+
+          <div className="mt-6 flex items-center">
+            <div className="flex-1 h-px bg-subtle"></div>
+            <span className="px-4 text-text-xs text-gray-500">OR</span>
+            <div className="flex-1 h-px bg-subtle"></div>
+          </div>
+
+          <div className="mt-6 flex justify-center">
+             <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError("Google sign-in was unsuccessful.")}
+                theme="filled_black"
+                shape="rectangular"
+                size="large"
+                text="continue_with"
+                width="100%"
+             />
+          </div>
+
+          <p className="mt-8 text-center text-text-sm text-gray-400">
+            Don't have an account? <Link to="/signup" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">Sign up</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
