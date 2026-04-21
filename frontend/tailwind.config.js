@@ -133,6 +133,7 @@ export default {
         wave: {
           '0%, 100%': { transform: 'translateX(0)' },
           '50%': { transform: 'translateX(-20px)' },
+        },
         pulse: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.5' },
