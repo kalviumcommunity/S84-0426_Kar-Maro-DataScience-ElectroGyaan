@@ -34,12 +34,18 @@ export default {
         green: {
           400: '#34D399',
           500: '#10B981',
+          600: '#059669',
         },
         red: {
           300: '#F87171',
           400: '#F87171',
           500: '#EF4444',
+          600: '#DC2626',
           900: '#7F1D1D',
+        },
+        purple: {
+          500: '#8B5CF6',
+          600: '#7C3AED',
         },
         gray: {
           50: '#F9FAFB',
@@ -68,6 +74,7 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       fontSize: {
@@ -81,9 +88,9 @@ export default {
         'text-md': ['16px', { lineHeight: '24px', fontWeight: '400' }],
         'text-sm': ['14px', { lineHeight: '20px', fontWeight: '400' }],
         'text-xs': ['12px', { lineHeight: '16px', fontWeight: '500' }],
-        'mono-lg': ['24px', { fontWeight: '600', fontFamily: 'JetBrains Mono' }],
-        'mono-md': ['18px', { fontWeight: '600', fontFamily: 'JetBrains Mono' }],
-        'mono-sm': ['14px', { fontWeight: '400', fontFamily: 'JetBrains Mono' }],
+        'mono-lg': ['24px', { lineHeight: '28px', fontWeight: '600', fontFamily: 'JetBrains Mono' }],
+        'mono-md': ['18px', { lineHeight: '22px', fontWeight: '600', fontFamily: 'JetBrains Mono' }],
+        'mono-sm': ['14px', { lineHeight: '18px', fontWeight: '400', fontFamily: 'JetBrains Mono' }],
       },
       borderRadius: {
         'sm': '4px',
@@ -126,7 +133,17 @@ export default {
         wave: {
           '0%, 100%': { transform: 'translateX(0)' },
           '50%': { transform: 'translateX(-20px)' },
+        pulse: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.5' },
+        },
+        ping: {
+          '0%': { transform: 'scale(1)', opacity: '1' },
+          '75%, 100%': { transform: 'scale(2)', opacity: '0' },
         }
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
       }
     },
   },

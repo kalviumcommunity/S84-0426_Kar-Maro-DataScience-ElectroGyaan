@@ -5,6 +5,8 @@
   body {
     @apply bg-level-0 text-white font-sans antialiased;
   }
+  
+  /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 4px;
     height: 4px;
@@ -19,9 +21,25 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #4B5563;
   }
+  
+  /* Custom scrollbar for specific elements */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #4B5563;
+  }
 }
 
 @layer components {
+  /* Button Components */
   .btn-primary {
     @apply h-[40px] px-[20px] rounded-md border-none flex items-center justify-center text-white text-[14px] font-semibold cursor-pointer;
     background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
@@ -33,6 +51,10 @@
   }
   .btn-primary:active {
     transform: scale(0.98);
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   .btn-secondary {
@@ -62,5 +84,29 @@
   }
   .btn-icon:hover {
     @apply bg-level-3 border-strong;
+  }
+  
+  /* Card hover effect */
+  .card-hover {
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(90deg, #3B82F6, #FBBF24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* 3D Transform for mockup */
+  .mockup-3d {
+    transform: perspective(1200px) rotateY(-8deg) rotateX(3deg) rotateZ(0.5deg);
+    transform-style: preserve-3d;
   }
 }
