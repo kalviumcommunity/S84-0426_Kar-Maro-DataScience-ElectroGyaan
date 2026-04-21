@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { LucideArrowLeft, LucideCalendar } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts';
+import { Link, useParams } from 'react-router-dom';
 
 // Specific Dummy Data for A112 Electrogyaan AI
 const chartData = [
@@ -20,26 +21,29 @@ const chartData = [
 ];
 
 export default function ApartmentDetail() {
+  const { id } = useParams();
+  const apartmentId = id || 'A112';
+
   return (
     <DashboardLayout>
       <div className="p-8 bg-[#0A0F1E] min-h-full">
         {/* BREADCRUMB */}
         <div className="flex items-center text-[14px]">
-          <span className="text-gray-500 hover:text-gray-300 cursor-pointer">Dashboard</span>
+          <Link to="/dashboard" className="text-gray-500 hover:text-gray-300 cursor-pointer">Dashboard</Link>
           <span className="text-gray-700 mx-2">&gt;</span>
-          <span className="text-gray-500 hover:text-gray-300 cursor-pointer">Apartments</span>
+          <Link to="/apartments" className="text-gray-500 hover:text-gray-300 cursor-pointer">Apartments</Link>
           <span className="text-gray-700 mx-2">&gt;</span>
-          <span className="text-white font-semibold">A112</span>
+          <span className="text-white font-semibold">{apartmentId}</span>
         </div>
 
         {/* PAGE HEADER */}
         <div className="mt-2 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <div className="w-[48px] h-[48px] bg-gradient-to-br from-[rgba(239,68,68,0.3)] to-[rgba(127,29,29,0.5)] border border-red-500/50 rounded-xl flex items-center justify-center text-[16px] font-mono font-bold text-red-400">
-              A112
+              {apartmentId}
             </div>
             <div>
-              <h1 className="text-[30px] font-bold text-white leading-tight font-inter">Apartment A112</h1>
+              <h1 className="text-[30px] font-bold text-white leading-tight font-inter">Apartment {apartmentId}</h1>
               <div className="flex items-center gap-2 mt-1">
                 <InfoChip>Floor 1</InfoChip>
                 <InfoChip>Block B</InfoChip>
@@ -52,9 +56,9 @@ export default function ApartmentDetail() {
           </div>
 
           <div className="flex gap-4">
-            <button className="h-[36px] px-4 border border-default rounded-md text-[14px] text-gray-300 hover:text-white flex items-center hover:bg-level-3">
+            <Link to="/apartments" className="h-[36px] px-4 border border-default rounded-md text-[14px] text-gray-300 hover:text-white flex items-center hover:bg-level-3 transition-colors">
               <LucideArrowLeft className="w-[14px] h-[14px] mr-2" /> Back to Apartments
-            </button>
+            </Link>
             <div className="h-[36px] w-[200px] bg-level-1 border border-subtle rounded-md px-3 text-[14px] text-gray-300 flex items-center justify-between cursor-pointer hover:border-strong">
               <span>Last 30 Days</span>
               <LucideCalendar className="w-[14px] h-[14px] text-gray-500" />

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { LucideLayoutGrid, LucideList, LucideMap, LucideSearch } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
+import { Link } from 'react-router-dom';
 
 const flats = [
   { id: 'A101', floor: '1', wing: 'A', kwh: 14.2, status: 'Normal', month: '↑ 423 kWh/mo', anomalies: 0, trend: Array.from({length: 12}, () => Math.random() * 10 + 5) },
@@ -84,11 +85,13 @@ const ApartmentCard = ({ id, floor, wing, kwh, status, month, anomalies, trend }
   
   const statusColor = isAnomaly ? 'red' : isWarning ? 'amber' : 'green';
   const baseColorHex = isAnomaly ? '#EF4444' : isWarning ? '#F59E0B' : '#10B981';
+  const statusColorClass = isAnomaly ? 'text-red-500' : isWarning ? 'text-amber-500' : 'text-green-500';
+  const dotColorClass = isAnomaly ? 'bg-red-500' : isWarning ? 'bg-amber-500' : 'bg-green-500';
 
   const chartData = trend.map((v, i) => ({ name: i, value: v }));
 
   return (
-    <div className={`relative h-[180px] bg-level-2 border rounded-xl p-4 cursor-pointer transition-all duration-200 group
+    <Link to={`/apartments/${id}`} className={`relative h-[180px] bg-level-2 border rounded-xl p-4 cursor-pointer transition-all duration-200 group block
       ${isAnomaly ? 'border-red-500/50 bg-gradient-to-br from-[#111827] to-[rgba(127,29,29,0.15)] shadow-[0_0_16px_rgba(239,68,68,0.15)]' : 
         isWarning ? 'border-amber-500/50 bg-gradient-to-br from-[#111827] to-[rgba(180,83,9,0.1)]' : 
         'border-subtle hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:-translate-y-[2px]'
@@ -106,14 +109,14 @@ const ApartmentCard = ({ id, floor, wing, kwh, status, month, anomalies, trend }
         </div>
         {!isAnomaly && (
           <div className="flex gap-[6px]">
-            <div className={`w-[10px] h-[10px] rounded-full bg-${statusColor}-500`}></div>
+            <div className={`w-[10px] h-[10px] rounded-full ${dotColorClass}`}></div>
           </div>
         )}
       </div>
 
       {/* Value */}
       <div className="mt-3 flex items-baseline">
-        <span className={`text-[24px] font-bold font-mono text-${statusColor}-500 leading-none`}>{kwh}</span>
+        <span className={`text-[24px] font-bold font-mono ${statusColorClass} leading-none`}>{kwh}</span>
         <span className="text-[12px] text-gray-400 ml-1">kWh</span>
       </div>
 
@@ -141,6 +144,6 @@ const ApartmentCard = ({ id, floor, wing, kwh, status, month, anomalies, trend }
           <span className="text-[12px] text-green-400 font-semibold flex items-center gap-1">✓ Normal</span>
         )}
       </div>
-    </div>
+    </Link>
   );
 };
