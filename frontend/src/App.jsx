@@ -5,6 +5,13 @@ import AdminDashboard from './pages/AdminDashboard';
 import UserDashboard from './pages/UserDashboard';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Landing from './pages/Landing/Landing';
+import Dashboard from './pages/Dashboard/Dashboard';
+import AnomalyLog from './pages/AnomalyLog/AnomalyLog';
+import Apartments from './pages/Apartments/Apartments';
+import ApartmentDetail from './pages/ApartmentDetail/ApartmentDetail';
+import Reports from './pages/Reports/Reports';
+import Settings from './pages/Settings/Settings';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, roles }) => {
@@ -37,7 +44,7 @@ const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Landing />} />
         
         <Route path="/login" element={
           <PublicRoute>
@@ -49,6 +56,42 @@ const AppRoutes = () => {
            <PublicRoute>
              <Signup />
            </PublicRoute>
+        } />
+        
+        <Route path="/dashboard" element={
+          <ProtectedRoute roles={['admin', 'user']}>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/anomalies" element={
+          <ProtectedRoute roles={['admin', 'user']}>
+            <AnomalyLog />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/apartments" element={
+          <ProtectedRoute roles={['admin', 'user']}>
+            <Apartments />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/apartments/:id" element={
+          <ProtectedRoute roles={['admin', 'user']}>
+            <ApartmentDetail />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/reports" element={
+          <ProtectedRoute roles={['admin', 'user']}>
+            <Reports />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/settings" element={
+          <ProtectedRoute roles={['admin', 'user']}>
+            <Settings />
+          </ProtectedRoute>
         } />
         
         <Route path="/admin/dashboard" element={
@@ -63,7 +106,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
