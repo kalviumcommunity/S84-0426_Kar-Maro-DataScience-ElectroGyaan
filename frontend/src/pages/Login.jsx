@@ -135,15 +135,17 @@ const Login = () => {
           <p className="text-[16px] text-gray-400 mt-2">Sign in to your society dashboard</p>
 
           {/* GOOGLE OAUTH BUTTON */}
-          <button className="mt-8 w-full h-[44px] bg-level-2 border border-default rounded-md flex items-center justify-center gap-3 hover:bg-level-3 hover:border-strong transition-all">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19.8 10.2273C19.8 9.51819 19.7364 8.83637 19.6182 8.18182H10.2V12.05H15.5818C15.3273 13.3 14.5636 14.3591 13.4182 15.0682V17.5773H16.7364C18.7091 15.7682 19.8 13.2318 19.8 10.2273Z" fill="#4285F4"/>
-              <path d="M10.2 20C12.9 20 15.1727 19.1045 16.7364 17.5773L13.4182 15.0682C12.4636 15.6682 11.2545 16.0227 10.2 16.0227C7.59091 16.0227 5.37273 14.2 4.52727 11.8H1.11364V14.3909C2.66818 17.4909 6.20909 20 10.2 20Z" fill="#34A853"/>
-              <path d="M4.52727 11.8C4.30909 11.2 4.18182 10.5545 4.18182 9.88636C4.18182 9.21818 4.30909 8.57273 4.52727 7.97273V5.38182H1.11364C0.418182 6.77273 0 8.28636 0 9.88636C0 11.4864 0.418182 13 1.11364 14.3909L4.52727 11.8Z" fill="#FBBC05"/>
-              <path d="M10.2 3.75C11.3545 3.75 12.3818 4.13636 13.1909 4.90909L16.1364 1.96364C15.1682 1.06364 12.9 0 10.2 0C6.20909 0 2.66818 2.50909 1.11364 5.38182L4.52727 7.97273C5.37273 5.6 7.59091 3.75 10.2 3.75Z" fill="#EA4335"/>
-            </svg>
-            <span className="text-[14px] font-medium text-gray-200">Continue with Google</span>
-          </button>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError("Google sign-in failed")}
+            useOneTap
+            theme="filled_black"
+            size="large"
+            text="continue_with"
+            shape="rectangular"
+            logo_alignment="left"
+            width="400"
+          />
 
           {/* DIVIDER */}
           <div className="flex items-center gap-3 my-6">
