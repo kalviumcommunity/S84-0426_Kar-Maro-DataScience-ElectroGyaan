@@ -113,12 +113,19 @@ export default {
       animation: {
         'ping-slow': 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
         'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'pulse-custom': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'ping-custom': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
         'shimmer': 'shimmer 2s infinite',
+        'wave': 'wave 8s ease-in-out infinite',
       },
       keyframes: {
         shimmer: {
           '0%': { backgroundPosition: '-200px' },
           '100%': { backgroundPosition: 'calc(200px + 100%)' },
+        },
+        wave: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '50%': { transform: 'translateX(-20px)' },
         }
       }
     },
