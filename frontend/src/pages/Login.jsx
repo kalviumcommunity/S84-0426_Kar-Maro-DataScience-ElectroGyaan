@@ -156,7 +156,8 @@ export function AuthShell({ children }) {
 
 export function AuthRightPane({ children }) {
   return (
-    <div className="w-full lg:w-[42%] flex flex-col justify-center items-center p-6 lg:p-10 relative">
+    /* Right pane: slightly different bg from left so there's visual separation in light mode */
+    <div className="w-full lg:w-[42%] flex flex-col justify-center items-center p-6 lg:p-10 relative bg-level-0">
       {/* Theme toggle */}
       <div className="absolute top-5 right-5">
         <ThemeToggle />
@@ -177,7 +178,9 @@ export function AuthRightPane({ children }) {
 
 export function AuthCard({ title, subtitle, error, footer, children }) {
   return (
-    <div className="bg-level-1 border border-subtle rounded-2xl p-8 shadow-card">
+    /* Card: white in both modes, but with a real shadow in light so it lifts off the bg */
+    <div className="bg-[var(--color-surface-card)] border border-[var(--color-border-default)] rounded-2xl p-8"
+      style={{ boxShadow: 'var(--shadow-card-lg)' }}>
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-[24px] font-bold text-[var(--color-text-primary)] leading-tight">{title}</h2>
