@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LucideLayoutDashboard, LucideActivity, LucideAlertTriangle, LucideTrendingUp, LucideBuilding2, LucideFileText, LucideSettings, LucideHelpCircle, LucideLogOut, LucideChevronDown, LucideBell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggle from '../ui/ThemeToggle';
 
 const Topbar = () => {
   const { user } = useAuth();
@@ -36,6 +37,11 @@ const Topbar = () => {
           </div>
           <span className="text-[12px] font-medium text-green-400">Live · Updated 2s ago</span>
         </div>
+
+        <div className="h-[24px] w-[1px] bg-gray-700"></div>
+
+        {/* Theme Toggle */}
+        <ThemeToggle />
 
         <div className="h-[24px] w-[1px] bg-gray-700"></div>
 
