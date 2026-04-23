@@ -14,6 +14,7 @@ import {
   LucideLogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggle from '../ui/ThemeToggle';
 
 const NAV_ITEMS = [
   { id: 'dashboard',   label: 'Dashboard',    icon: LucideLayoutDashboard, path: '/dashboard' },
@@ -39,7 +40,7 @@ export default function AppShell() {
   };
 
   return (
-    <div className="grid grid-cols-[240px_1fr] grid-rows-[64px_1fr] h-[100vh] w-full bg-level-0 font-sans text-white overflow-hidden">
+    <div className="grid grid-cols-[240px_1fr] grid-rows-[64px_1fr] h-[100vh] w-full bg-level-0 font-sans text-[var(--color-text-primary)] overflow-hidden">
       
       {/* ── LEFT SIDEBAR ── */}
       <div className="row-span-2 bg-level-1 border-r border-subtle flex flex-col relative z-20 h-full overflow-y-auto">
@@ -47,19 +48,19 @@ export default function AppShell() {
         {/* Sidebar Header */}
         <div className="h-[64px] px-[20px] flex items-center gap-[10px] border-b border-subtle shrink-0">
           <LucideZap className="w-[18px] h-[18px] text-amber-400" style={{ filter: 'drop-shadow(0 0 10px rgba(245,158,11,0.4))' }} />
-          <span className="text-[16px] font-bold">ElectroGyaan AI</span>
+          <span className="text-[16px] font-bold text-[var(--color-text-primary)]">ElectroGyaan AI</span>
         </div>
 
         {/* User Info Card */}
         <div className="m-[16px_12px] bg-level-2 border border-subtle rounded-md p-[12px] flex items-center justify-between">
           <div className="flex items-center gap-[10px]">
-            <div className="w-[36px] h-[36px] rounded-md bg-gradient-to-br from-blue-700 to-purple-600 flex items-center justify-center text-[14px] font-bold shadow-inner">
+            <div className="w-[36px] h-[36px] rounded-md bg-gradient-to-br from-blue-700 to-purple-600 flex items-center justify-center text-[14px] font-bold shadow-inner text-white">
               {user?.name?.substring(0, 2).toUpperCase() || 'U'}
             </div>
             <div className="flex flex-col">
-              <span className="text-[14px] font-semibold text-white truncate max-w-[100px]">{user?.name || 'User'}</span>
+              <span className="text-[14px] font-semibold text-[var(--color-text-primary)] truncate max-w-[100px]">{user?.name || 'User'}</span>
               <div className="flex items-center gap-[6px] mt-1">
-                <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[12px] font-semibold px-[8px] py-[2px] rounded-full capitalize">
+                <span className="bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[12px] font-semibold px-[8px] py-[2px] rounded-full capitalize">
                   {user?.role || 'user'}
                 </span>
               </div>
@@ -69,7 +70,7 @@ export default function AppShell() {
 
         {/* Main Nav */}
         <div className="flex-1 px-[8px] flex flex-col gap-[2px]">
-          <div className="text-[12px] text-gray-600 font-semibold uppercase tracking-widest px-[12px] pt-[16px] pb-[6px]">Main</div>
+          <div className="text-[12px] text-[var(--color-text-faint)] font-semibold uppercase tracking-widest px-[12px] pt-[16px] pb-[6px]">Main</div>
           
           {NAV_ITEMS.map(item => {
             const isActive = location.pathname.startsWith(item.path);
@@ -79,14 +80,14 @@ export default function AppShell() {
                 onClick={() => handleNav(item.path)}
                 className={`h-[36px] px-[12px] rounded-md flex items-center gap-[10px] cursor-pointer transition-all duration-150 ${
                   isActive 
-                    ? 'bg-blue-600/10 text-blue-400 font-semibold border-l-2 border-blue-500 -ml-[2px] pl-[14px]' 
-                    : 'bg-transparent text-gray-400 font-medium hover:bg-level-2 hover:text-gray-200'
+                    ? 'bg-blue-500/10 text-blue-500 font-semibold border-l-2 border-blue-500 -ml-[2px] pl-[14px]' 
+                    : 'bg-transparent text-[var(--color-text-muted)] font-medium hover:bg-level-2 hover:text-[var(--color-text-primary)]'
                 }`}
               >
-                <item.icon className="w-[16px] h-[16px]" style={{ color: isActive ? '#60A5FA' : '' }} />
+                <item.icon className="w-[16px] h-[16px]" />
                 <span className="flex-1 text-left text-[14px]">{item.label}</span>
                 {item.badge && (
-                  <span className="bg-red-900 text-red-400 text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full">
+                  <span className="bg-red-500/15 text-red-500 text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full border border-red-500/30">
                     {item.badge}
                   </span>
                 )}
@@ -94,7 +95,7 @@ export default function AppShell() {
             );
           })}
 
-          <div className="h-[1px] bg-subtle m-[8px_12px]"></div>
+          <div className="h-[1px] bg-[var(--color-border-subtle)] m-[8px_12px]"></div>
 
           {SETTINGS_ITEMS.map(item => {
             const isActive = location.pathname.startsWith(item.path);
@@ -104,11 +105,11 @@ export default function AppShell() {
                 onClick={() => handleNav(item.path)}
                 className={`h-[36px] px-[12px] rounded-md flex items-center gap-[10px] cursor-pointer transition-all duration-150 ${
                   isActive 
-                    ? 'bg-blue-600/10 text-blue-400 font-semibold border-l-2 border-blue-500 -ml-[2px] pl-[14px]' 
-                    : 'bg-transparent text-gray-400 font-medium hover:bg-level-2 hover:text-gray-200'
+                    ? 'bg-blue-500/10 text-blue-500 font-semibold border-l-2 border-blue-500 -ml-[2px] pl-[14px]' 
+                    : 'bg-transparent text-[var(--color-text-muted)] font-medium hover:bg-level-2 hover:text-[var(--color-text-primary)]'
                 }`}
               >
-                <item.icon className="w-[16px] h-[16px]" style={{ color: isActive ? '#60A5FA' : '' }} />
+                <item.icon className="w-[16px] h-[16px]" />
                 <span className="flex-1 text-left text-[14px]">{item.label}</span>
               </button>
             );
@@ -121,23 +122,23 @@ export default function AppShell() {
             {user?.name?.substring(0, 2).toUpperCase() || 'U'}
           </div>
           <div className="flex flex-col flex-1">
-            <span className="text-[12px] font-semibold text-white">{user?.name || 'User'}</span>
-            <span className="text-[12px] text-gray-500 truncate max-w-[120px]">{user?.email || 'user@example.com'}</span>
+            <span className="text-[12px] font-semibold text-[var(--color-text-primary)]">{user?.name || 'User'}</span>
+            <span className="text-[12px] text-[var(--color-text-faint)] truncate max-w-[120px]">{user?.email || 'user@example.com'}</span>
           </div>
-          <button onClick={logout} className="text-gray-500 hover:text-red-400 transition-colors" title="Log Out">
+          <button onClick={logout} className="text-[var(--color-text-faint)] hover:text-red-500 transition-colors" title="Log Out">
             <LucideLogOut className="w-[16px] h-[16px]" />
           </button>
         </div>
       </div>
 
       {/* ── TOP BAR ── */}
-      <div className="bg-[#0A0F1E]/90 backdrop-blur-[12px] border-b border-subtle px-[32px] flex justify-between items-center z-10 sticky top-0 h-[64px]">
+      <div className="bg-[var(--color-surface-topbar)] backdrop-blur-[12px] border-b border-subtle px-[32px] flex justify-between items-center z-10 sticky top-0 h-[64px]">
         
         {/* Left: Breadcrumbs */}
         <div className="flex items-center">
-          <span className="text-[16px] font-semibold text-white">Dashboard</span>
-          <span className="text-gray-600 mx-[8px]">/</span>
-          <span className="text-[14px] text-gray-400 capitalize">{user?.role || 'User'} View</span>
+          <span className="text-[16px] font-semibold text-[var(--color-text-primary)]">Dashboard</span>
+          <span className="text-[var(--color-text-faint)] mx-[8px]">/</span>
+          <span className="text-[14px] text-[var(--color-text-muted)] capitalize">{user?.role || 'User'} View</span>
         </div>
 
         {/* Right: Actions */}
@@ -148,25 +149,30 @@ export default function AppShell() {
               <div className="absolute w-[12px] h-[12px] bg-green-500/30 rounded-full animate-ping-slow"></div>
               <div className="w-[8px] h-[8px] bg-green-500 rounded-full"></div>
             </div>
-            <span className="text-[12px] font-medium text-green-400">Live · Updated 2s ago</span>
+            <span className="text-[12px] font-medium text-green-500">Live · Updated 2s ago</span>
           </div>
 
-          <div className="w-[1px] h-[24px] bg-gray-700"></div>
+          <div className="w-[1px] h-[24px] bg-[var(--color-border-subtle)]"></div>
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
+          <div className="w-[1px] h-[24px] bg-[var(--color-border-subtle)]"></div>
 
           {/* Notifications */}
           <button className="relative w-[36px] h-[36px] flex items-center justify-center rounded-md hover:bg-level-3 transition-colors group">
-            <LucideBell className="w-[18px] h-[18px] text-gray-400 group-hover:text-white transition-colors" />
-            <div className="absolute top-[4px] right-[4px] w-[14px] h-[14px] bg-red-500 rounded-full flex items-center justify-center text-[9px] font-bold text-white border-2 border-level-1">
+            <LucideBell className="w-[18px] h-[18px] text-[var(--color-text-muted)] group-hover:text-[var(--color-text-primary)] transition-colors" />
+            <div className="absolute top-[4px] right-[4px] w-[14px] h-[14px] bg-red-500 rounded-full flex items-center justify-center text-[9px] font-bold text-white border-2 border-[var(--color-level-1)]">
               3
             </div>
           </button>
 
-          {/* Topbar User Avatar Dropdown */}
+          {/* Topbar User Avatar */}
           <div className="flex items-center gap-[4px] cursor-pointer border border-transparent hover:border-subtle p-1 rounded-md transition-colors">
             <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[12px] font-bold text-white shadow-inner">
               {user?.name?.substring(0, 2).toUpperCase() || 'U'}
             </div>
-            <LucideChevronDown className="w-[12px] h-[12px] text-gray-500" />
+            <LucideChevronDown className="w-[12px] h-[12px] text-[var(--color-text-faint)]" />
           </div>
         </div>
       </div>
