@@ -145,6 +145,17 @@
     transition: background-color 250ms ease, color 250ms ease;
   }
 
+  /* Smooth theme transitions on all interactive elements */
+  *, *::before, *::after {
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+  }
+  /* But don't slow down transforms/opacity animations */
+  .animate-ping-custom, .animate-pulse-custom, .animate-ping-slow, .animate-pulse-slow, .animate-shimmer {
+    transition: none !important;
+  }
+
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 4px;
