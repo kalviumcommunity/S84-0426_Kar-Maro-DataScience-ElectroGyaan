@@ -35,6 +35,14 @@
   --color-blue-600: #2563EB;
   --color-blue-700: #1D4ED8;
 
+  --color-amber-400: #FBBF24;
+  --color-amber-500: #F59E0B;
+  --color-green-400: #34D399;
+  --color-green-500: #10B981;
+  --color-red-400:   #F87171;
+  --color-red-500:   #EF4444;
+  --color-purple-500:#8B5CF6;
+
   /* Accent — Amber */
   --color-amber-400: #FBBF24;
   --color-amber-500: #F59E0B;
@@ -56,6 +64,11 @@
   --color-surface-topbar:  rgba(10, 15, 30, 0.9);
   --color-surface-input:   var(--color-level-2);
 
+  --color-scrollbar-thumb:       #374151;
+  --color-scrollbar-thumb-hover: #4B5563;
+
+  --shadow-card:      0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-card-lg:   0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(59,130,246,0.08);
   /* Scrollbar */
   --color-scrollbar-thumb:       #374151;
   --color-scrollbar-thumb-hover: #4B5563;
@@ -67,6 +80,7 @@
   --shadow-red-glow:  0 0 16px rgba(239,68,68,0.30);
 }
 
+.light {
 /* ── LIGHT THEME OVERRIDES ── */
 .light {
   /* Background levels — light grays */
@@ -95,6 +109,14 @@
   --color-blue-600: #1D4ED8;
   --color-blue-700: #1E40AF;
 
+  --color-amber-400: #D97706;
+  --color-amber-500: #B45309;
+  --color-green-400: #059669;
+  --color-green-500: #047857;
+  --color-red-400:   #DC2626;
+  --color-red-500:   #B91C1C;
+  --color-purple-500:#7C3AED;
+
   /* Accent — Amber */
   --color-amber-400: #D97706;
   --color-amber-500: #B45309;
@@ -116,6 +138,11 @@
   --color-surface-topbar:  rgba(255, 255, 255, 0.92);
   --color-surface-input:   #FFFFFF;
 
+  --color-scrollbar-thumb:       #CBD5E1;
+  --color-scrollbar-thumb-hover: #94A3B8;
+
+  --shadow-card:      0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-card-lg:   0 20px 40px rgba(0,0,0,0.10), 0 0 30px rgba(59,130,246,0.06);
   /* Scrollbar */
   --color-scrollbar-thumb:       #CBD5E1;
   --color-scrollbar-thumb-hover: #94A3B8;
@@ -128,6 +155,11 @@
 }
 
 /* ─────────────────────────────────────────────
+   BASE
+───────────────────────────────────────────── */
+@layer base {
+  html { color-scheme: dark; }
+  html.light { color-scheme: light; }
    BASE STYLES
 ───────────────────────────────────────────── */
 @layer base {
@@ -143,6 +175,17 @@
     color: var(--color-text-primary);
     @apply font-sans antialiased;
     transition: background-color 250ms ease, color 250ms ease;
+  }
+
+  /* Smooth theme transitions */
+  *, *::before, *::after {
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+  }
+  .animate-ping-custom, .animate-pulse-custom,
+  .animate-ping-slow, .animate-pulse-slow, .animate-shimmer {
+    transition: none !important;
   }
 
   /* Smooth theme transitions on all interactive elements */
@@ -185,9 +228,21 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: var(--color-scrollbar-thumb-hover);
   }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--color-scrollbar-thumb); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-scrollbar-thumb-hover); }
+
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--color-scrollbar-thumb); border-radius: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-scrollbar-thumb-hover); }
 }
 
 /* ─────────────────────────────────────────────
+   COMPONENTS
    COMPONENT STYLES  (theme-aware)
 ───────────────────────────────────────────── */
 @layer components {
@@ -198,6 +253,8 @@
     background: linear-gradient(135deg, var(--color-blue-600) 0%, var(--color-blue-700) 100%);
     transition: all 150ms ease;
   }
+  .btn-primary:hover { background: var(--color-blue-500); box-shadow: var(--shadow-blue-glow); }
+  .btn-primary:active { transform: scale(0.98); }
   .btn-primary:hover {
     background: var(--color-blue-500);
     box-shadow: var(--shadow-blue-glow);
@@ -222,6 +279,7 @@
     background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
     transition: all 150ms ease;
   }
+  .btn-danger:hover { background: #DC2626; box-shadow: var(--shadow-red-glow); }
   .btn-danger:hover  { background: #DC2626; box-shadow: var(--shadow-red-glow); }
   .btn-danger:active { transform: scale(0.98); }
 
@@ -231,6 +289,33 @@
     border: 1px solid var(--color-border-subtle);
     transition: all 150ms ease;
   }
+  .btn-icon:hover { background-color: var(--color-level-3); border-color: var(--color-border-strong); }
+
+  /* ── Auth input — unified across Login & Signup ── */
+  .auth-input {
+    width: 100%;
+    height: 46px;
+    background-color: var(--color-surface-input);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 8px;
+    padding: 0 16px;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .auth-input::placeholder { color: var(--color-text-faint); }
+  .auth-input:focus {
+    outline: none;
+    border-color: var(--color-blue-500);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+  select.auth-input {
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
   .btn-icon:hover {
     background-color: var(--color-level-3);
     border-color: var(--color-border-strong);
@@ -240,6 +325,9 @@
   .card-hover {
     transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  /* ── Card hover ── */
+  .card-hover { transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1); }
   .card-hover:hover {
     transform: translateY(-2px);
     border-color: rgba(59, 130, 246, 0.4);
@@ -260,6 +348,10 @@
     transform-style: preserve-3d;
   }
 
+  /* ── Surface helpers ── */
+  .surface-card    { background-color: var(--color-surface-card);    border: 1px solid var(--color-border-subtle); }
+  .surface-sidebar { background-color: var(--color-surface-sidebar); border-right: 1px solid var(--color-border-subtle); }
+  .surface-topbar  { background-color: var(--color-surface-topbar);  border-bottom: 1px solid var(--color-border-subtle); backdrop-filter: blur(12px); }
   /* ── Theme-aware surface helpers ── */
   .surface-card {
     background-color: var(--color-surface-card);

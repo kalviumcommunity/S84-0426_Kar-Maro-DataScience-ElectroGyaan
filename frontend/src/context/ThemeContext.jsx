@@ -4,6 +4,11 @@ const ThemeContext = createContext(null);
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem('eg-theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+      if (window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
+    } catch (_) {}
     // Persist theme preference in localStorage
     const saved = localStorage.getItem('eg-theme');
     if (saved === 'light' || saved === 'dark') return saved;
@@ -21,6 +26,7 @@ export const ThemeProvider = ({ children }) => {
       root.classList.add('dark');
       root.classList.remove('light');
     }
+    try { localStorage.setItem('eg-theme', theme); } catch (_) {}
     localStorage.setItem('eg-theme', theme);
   }, [theme]);
 
