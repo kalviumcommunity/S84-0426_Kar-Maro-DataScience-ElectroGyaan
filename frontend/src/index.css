@@ -1,11 +1,150 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
+/* ─────────────────────────────────────────────
+   DESIGN TOKENS — CSS VARIABLES
+   Dark mode is the default (:root / .dark)
+   Light mode overrides via .light on <html>
+───────────────────────────────────────────── */
+
+:root,
+.dark {
+  /* Background levels */
+  --color-level-0: #0A0F1E;
+  --color-level-1: #0D1425;
+  --color-level-2: #111827;
+  --color-level-3: #1A2235;
+  --color-level-4: #1F2D40;
+  --color-level-5: #243347;
+
+  /* Foreground / text */
+  --color-text-primary:   #FFFFFF;
+  --color-text-secondary: #D1D5DB;
+  --color-text-muted:     #9CA3AF;
+  --color-text-faint:     #6B7280;
+  --color-text-disabled:  #4B5563;
+
+  /* Borders */
+  --color-border-subtle:  rgba(55, 65, 81, 0.6);
+  --color-border-default: #374151;
+  --color-border-strong:  #4B5563;
+
+  /* Accent — Blue */
+  --color-blue-400: #60A5FA;
+  --color-blue-500: #3B82F6;
+  --color-blue-600: #2563EB;
+  --color-blue-700: #1D4ED8;
+
+  /* Accent — Amber */
+  --color-amber-400: #FBBF24;
+  --color-amber-500: #F59E0B;
+
+  /* Accent — Green */
+  --color-green-400: #34D399;
+  --color-green-500: #10B981;
+
+  /* Accent — Red */
+  --color-red-400: #F87171;
+  --color-red-500: #EF4444;
+
+  /* Accent — Purple */
+  --color-purple-500: #8B5CF6;
+
+  /* Surfaces */
+  --color-surface-card:    var(--color-level-2);
+  --color-surface-sidebar: var(--color-level-1);
+  --color-surface-topbar:  rgba(10, 15, 30, 0.9);
+  --color-surface-input:   var(--color-level-2);
+
+  /* Scrollbar */
+  --color-scrollbar-thumb:       #374151;
+  --color-scrollbar-thumb-hover: #4B5563;
+
+  /* Shadows */
+  --shadow-card:      0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-card-lg:   0 40px 80px rgba(0,0,0,0.6), 0 0 60px rgba(59,130,246,0.12), inset 0 1px 0 rgba(255,255,255,0.04);
+  --shadow-blue-glow: 0 0 20px rgba(59,130,246,0.25);
+  --shadow-red-glow:  0 0 16px rgba(239,68,68,0.30);
+}
+
+/* ── LIGHT THEME OVERRIDES ── */
+.light {
+  /* Background levels — light grays */
+  --color-level-0: #F0F4F8;
+  --color-level-1: #FFFFFF;
+  --color-level-2: #F8FAFC;
+  --color-level-3: #EEF2F7;
+  --color-level-4: #E4EAF2;
+  --color-level-5: #D9E2ED;
+
+  /* Foreground / text */
+  --color-text-primary:   #0F172A;
+  --color-text-secondary: #1E293B;
+  --color-text-muted:     #475569;
+  --color-text-faint:     #64748B;
+  --color-text-disabled:  #94A3B8;
+
+  /* Borders */
+  --color-border-subtle:  rgba(148, 163, 184, 0.4);
+  --color-border-default: #CBD5E1;
+  --color-border-strong:  #94A3B8;
+
+  /* Accent — Blue (slightly deeper for light bg readability) */
+  --color-blue-400: #3B82F6;
+  --color-blue-500: #2563EB;
+  --color-blue-600: #1D4ED8;
+  --color-blue-700: #1E40AF;
+
+  /* Accent — Amber */
+  --color-amber-400: #D97706;
+  --color-amber-500: #B45309;
+
+  /* Accent — Green */
+  --color-green-400: #059669;
+  --color-green-500: #047857;
+
+  /* Accent — Red */
+  --color-red-400: #DC2626;
+  --color-red-500: #B91C1C;
+
+  /* Accent — Purple */
+  --color-purple-500: #7C3AED;
+
+  /* Surfaces */
+  --color-surface-card:    #FFFFFF;
+  --color-surface-sidebar: #FFFFFF;
+  --color-surface-topbar:  rgba(255, 255, 255, 0.92);
+  --color-surface-input:   #FFFFFF;
+
+  /* Scrollbar */
+  --color-scrollbar-thumb:       #CBD5E1;
+  --color-scrollbar-thumb-hover: #94A3B8;
+
+  /* Shadows — softer on light */
+  --shadow-card:      0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-card-lg:   0 20px 40px rgba(0,0,0,0.10), 0 0 30px rgba(59,130,246,0.08);
+  --shadow-blue-glow: 0 0 20px rgba(37,99,235,0.20);
+  --shadow-red-glow:  0 0 16px rgba(185,28,28,0.20);
+}
+
+/* ─────────────────────────────────────────────
+   BASE STYLES
+───────────────────────────────────────────── */
 @layer base {
-  body {
-    @apply bg-level-0 text-white font-sans antialiased;
+  html {
+    color-scheme: dark;
   }
-  
+  html.light {
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--color-level-0);
+    color: var(--color-text-primary);
+    @apply font-sans antialiased;
+    transition: background-color 250ms ease, color 250ms ease;
+  }
+
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 4px;
@@ -15,14 +154,13 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #374151;
+    background: var(--color-scrollbar-thumb);
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #4B5563;
+    background: var(--color-scrollbar-thumb-hover);
   }
-  
-  /* Custom scrollbar for specific elements */
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
   }
@@ -30,39 +168,42 @@
     background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #374151;
+    background: var(--color-scrollbar-thumb);
     border-radius: 4px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #4B5563;
+    background: var(--color-scrollbar-thumb-hover);
   }
 }
 
+/* ─────────────────────────────────────────────
+   COMPONENT STYLES  (theme-aware)
+───────────────────────────────────────────── */
 @layer components {
-  /* Button Components */
+
+  /* ── Buttons ── */
   .btn-primary {
     @apply h-[40px] px-[20px] rounded-md border-none flex items-center justify-center text-white text-[14px] font-semibold cursor-pointer;
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    background: linear-gradient(135deg, var(--color-blue-600) 0%, var(--color-blue-700) 100%);
     transition: all 150ms ease;
   }
   .btn-primary:hover {
-    background: #3B82F6;
-    box-shadow: 0 0 20px rgba(59,130,246,0.25);
+    background: var(--color-blue-500);
+    box-shadow: var(--shadow-blue-glow);
   }
-  .btn-primary:active {
-    transform: scale(0.98);
-  }
-  .btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  .btn-primary:active  { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .btn-secondary {
-    @apply h-[40px] px-[20px] rounded-md bg-transparent border border-default text-gray-300 text-[14px] font-medium flex items-center justify-center cursor-pointer;
+    @apply h-[40px] px-[20px] rounded-md bg-transparent text-[14px] font-medium flex items-center justify-center cursor-pointer;
+    border: 1px solid var(--color-border-default);
+    color: var(--color-text-secondary);
     transition: all 150ms ease;
   }
   .btn-secondary:hover {
-    @apply bg-level-3 border-strong text-white;
+    background-color: var(--color-level-3);
+    border-color: var(--color-border-strong);
+    color: var(--color-text-primary);
   }
 
   .btn-danger {
@@ -70,23 +211,21 @@
     background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
     transition: all 150ms ease;
   }
-  .btn-danger:hover {
-    background: #DC2626;
-    box-shadow: 0 0 16px rgba(239,68,68,0.30);
-  }
-  .btn-danger:active {
-    transform: scale(0.98);
-  }
+  .btn-danger:hover  { background: #DC2626; box-shadow: var(--shadow-red-glow); }
+  .btn-danger:active { transform: scale(0.98); }
 
   .btn-icon {
-    @apply w-[36px] h-[36px] flex items-center justify-center rounded-md bg-level-2 border border-subtle cursor-pointer;
+    @apply w-[36px] h-[36px] flex items-center justify-center rounded-md cursor-pointer;
+    background-color: var(--color-level-2);
+    border: 1px solid var(--color-border-subtle);
     transition: all 150ms ease;
   }
   .btn-icon:hover {
-    @apply bg-level-3 border-strong;
+    background-color: var(--color-level-3);
+    border-color: var(--color-border-strong);
   }
-  
-  /* Card hover effect */
+
+  /* ── Card hover ── */
   .card-hover {
     transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -95,18 +234,49 @@
     border-color: rgba(59, 130, 246, 0.4);
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
   }
-  
-  /* Gradient text */
+
+  /* ── Gradient text ── */
   .gradient-text {
     background: linear-gradient(90deg, #3B82F6, #FBBF24);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
-  /* 3D Transform for mockup */
+
+  /* ── 3D mockup ── */
   .mockup-3d {
     transform: perspective(1200px) rotateY(-8deg) rotateX(3deg) rotateZ(0.5deg);
     transform-style: preserve-3d;
   }
+
+  /* ── Theme-aware surface helpers ── */
+  .surface-card {
+    background-color: var(--color-surface-card);
+    border: 1px solid var(--color-border-subtle);
+  }
+  .surface-sidebar {
+    background-color: var(--color-surface-sidebar);
+    border-right: 1px solid var(--color-border-subtle);
+  }
+  .surface-topbar {
+    background-color: var(--color-surface-topbar);
+    border-bottom: 1px solid var(--color-border-subtle);
+    backdrop-filter: blur(12px);
+  }
+  .surface-input {
+    background-color: var(--color-surface-input);
+    border: 1px solid var(--color-border-subtle);
+    color: var(--color-text-primary);
+  }
+  .surface-input:focus {
+    outline: none;
+    border-color: var(--color-blue-500);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+
+  /* ── Text helpers ── */
+  .text-primary   { color: var(--color-text-primary); }
+  .text-secondary { color: var(--color-text-secondary); }
+  .text-muted     { color: var(--color-text-muted); }
+  .text-faint     { color: var(--color-text-faint); }
 }
