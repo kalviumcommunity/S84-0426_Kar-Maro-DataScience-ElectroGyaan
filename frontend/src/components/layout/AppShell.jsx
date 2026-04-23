@@ -132,13 +132,13 @@ export default function AppShell() {
       </div>
 
       {/* ── TOP BAR ── */}
-      <div className="bg-[#0A0F1E]/90 backdrop-blur-[12px] border-b border-subtle px-[32px] flex justify-between items-center z-10 sticky top-0 h-[64px]">
+      <div className="bg-[var(--color-surface-topbar)] backdrop-blur-[12px] border-b border-subtle px-[32px] flex justify-between items-center z-10 sticky top-0 h-[64px]">
         
         {/* Left: Breadcrumbs */}
         <div className="flex items-center">
-          <span className="text-[16px] font-semibold text-white">Dashboard</span>
-          <span className="text-gray-600 mx-[8px]">/</span>
-          <span className="text-[14px] text-gray-400 capitalize">{user?.role || 'User'} View</span>
+          <span className="text-[16px] font-semibold text-[var(--color-text-primary)]">Dashboard</span>
+          <span className="text-[var(--color-text-faint)] mx-[8px]">/</span>
+          <span className="text-[14px] text-[var(--color-text-muted)] capitalize">{user?.role || 'User'} View</span>
         </div>
 
         {/* Right: Actions */}
@@ -149,30 +149,30 @@ export default function AppShell() {
               <div className="absolute w-[12px] h-[12px] bg-green-500/30 rounded-full animate-ping-slow"></div>
               <div className="w-[8px] h-[8px] bg-green-500 rounded-full"></div>
             </div>
-            <span className="text-[12px] font-medium text-green-400">Live · Updated 2s ago</span>
+            <span className="text-[12px] font-medium text-green-500">Live · Updated 2s ago</span>
           </div>
 
-          <div className="w-[1px] h-[24px] bg-gray-700"></div>
+          <div className="w-[1px] h-[24px] bg-[var(--color-border-subtle)]"></div>
 
           {/* Theme Toggle */}
           <ThemeToggle />
 
-          <div className="w-[1px] h-[24px] bg-gray-700"></div>
+          <div className="w-[1px] h-[24px] bg-[var(--color-border-subtle)]"></div>
 
           {/* Notifications */}
           <button className="relative w-[36px] h-[36px] flex items-center justify-center rounded-md hover:bg-level-3 transition-colors group">
-            <LucideBell className="w-[18px] h-[18px] text-gray-400 group-hover:text-white transition-colors" />
-            <div className="absolute top-[4px] right-[4px] w-[14px] h-[14px] bg-red-500 rounded-full flex items-center justify-center text-[9px] font-bold text-white border-2 border-level-1">
+            <LucideBell className="w-[18px] h-[18px] text-[var(--color-text-muted)] group-hover:text-[var(--color-text-primary)] transition-colors" />
+            <div className="absolute top-[4px] right-[4px] w-[14px] h-[14px] bg-red-500 rounded-full flex items-center justify-center text-[9px] font-bold text-white border-2 border-[var(--color-level-1)]">
               3
             </div>
           </button>
 
-          {/* Topbar User Avatar Dropdown */}
+          {/* Topbar User Avatar */}
           <div className="flex items-center gap-[4px] cursor-pointer border border-transparent hover:border-subtle p-1 rounded-md transition-colors">
             <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[12px] font-bold text-white shadow-inner">
               {user?.name?.substring(0, 2).toUpperCase() || 'U'}
             </div>
-            <LucideChevronDown className="w-[12px] h-[12px] text-gray-500" />
+            <LucideChevronDown className="w-[12px] h-[12px] text-[var(--color-text-faint)]" />
           </div>
         </div>
       </div>

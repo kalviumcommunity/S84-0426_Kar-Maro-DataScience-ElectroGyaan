@@ -22,11 +22,11 @@ const Topbar = () => {
   };
 
   return (
-    <div className="fixed left-[240px] right-0 top-0 h-[64px] bg-[rgba(10,15,30,0.9)] backdrop-blur-[12px] border-b border-subtle px-8 flex justify-between items-center z-50">
+    <div className="fixed left-[240px] right-0 top-0 h-[64px] bg-[var(--color-surface-topbar)] backdrop-blur-[12px] border-b border-subtle px-8 flex justify-between items-center z-50">
       <div className="flex items-center text-sm">
-        <span className="text-[16px] font-semibold text-white">{getPageTitle()}</span>
-        <span className="text-gray-600 mx-2">/</span>
-        <span className="text-[14px] text-gray-400 capitalize">{user?.role || 'User'} View</span>
+        <span className="text-[16px] font-semibold text-[var(--color-text-primary)]">{getPageTitle()}</span>
+        <span className="text-[var(--color-text-faint)] mx-2">/</span>
+        <span className="text-[14px] text-[var(--color-text-muted)] capitalize">{user?.role || 'User'} View</span>
       </div>
 
       <div className="flex items-center gap-4">
@@ -35,18 +35,18 @@ const Topbar = () => {
             <span className="absolute inline-flex h-3 w-3 rounded-full bg-green-500 opacity-30 animate-pulse-custom"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10B981]"></span>
           </div>
-          <span className="text-[12px] font-medium text-green-400">Live · Updated 2s ago</span>
+          <span className="text-[12px] font-medium text-green-500">Live · Updated 2s ago</span>
         </div>
 
-        <div className="h-[24px] w-[1px] bg-gray-700"></div>
+        <div className="h-[24px] w-[1px] bg-[var(--color-border-subtle)]"></div>
 
         {/* Theme Toggle */}
         <ThemeToggle />
 
-        <div className="h-[24px] w-[1px] bg-gray-700"></div>
+        <div className="h-[24px] w-[1px] bg-[var(--color-border-subtle)]"></div>
 
         <button className="relative w-[36px] h-[36px] flex items-center justify-center rounded-md hover:bg-level-3 group transition-colors">
-          <LucideBell className="w-[18px] h-[18px] text-gray-400 group-hover:text-white" />
+          <LucideBell className="w-[18px] h-[18px] text-[var(--color-text-muted)] group-hover:text-[var(--color-text-primary)]" />
           <span className="absolute top-[4px] right-[4px] w-[8px] h-[8px] bg-red-500 rounded-full flex items-center justify-center">
             <span className="text-[9px] text-white font-bold hidden">3</span>
           </span>
@@ -56,7 +56,7 @@ const Topbar = () => {
           <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[12px] text-white font-semibold">
             {user?.name?.substring(0, 2).toUpperCase() || 'U'}
           </div>
-          <LucideChevronDown className="w-[12px] h-[12px] text-gray-500" />
+          <LucideChevronDown className="w-[12px] h-[12px] text-[var(--color-text-faint)]" />
         </div>
       </div>
     </div>
