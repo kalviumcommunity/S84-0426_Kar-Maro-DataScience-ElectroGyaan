@@ -10,6 +10,7 @@ import {
 import { useEnergyData } from '../../hooks/useEnergyData';
 import MemeAlertModal from '../../components/MemeAlertModal';
 import { useTheme } from '../../context/ThemeContext';
+import KPICard from '../../components/ui/KPICard';
 
 export default function Dashboard() {
   const { energyData, stats, anomalies, prediction, loading, error, newAnomalyDetected } = useEnergyData('A101');
@@ -88,15 +89,18 @@ export default function Dashboard() {
           <KPICard
             accentColor="amber"
             label="TODAY'S CONSUMPTION"
-            icon={<LucideZap className="w-[14px] h-[14px] text-amber-500" />}
+            icon={<LucideZap className="w-[15px] h-[15px] text-amber-500" />}
             value={<>{stats?.totalConsumption?.toFixed(1) || '--'} <span className="text-[14px] text-[var(--color-text-muted)] font-inter">kWh</span></>}
-            change={stats?.totalConsumption > 0 ? `↑ ${((stats.totalConsumption / 800) * 100 - 100).toFixed(1)}% vs yesterday` : ''}
-            changeColor="red"
+            trend={stats?.totalConsumption > 0 ? {
+              value: `${((stats.totalConsumption / 800) * 100 - 100).toFixed(1)}%`,
+              direction: 'up',
+              label: 'vs yesterday'
+            } : undefined}
           />
           <KPICard
             accentColor="red"
             label="ACTIVE ANOMALIES"
-            icon={<LucideAlertTriangle className="w-[14px] h-[14px] text-red-500" />}
+            icon={<LucideAlertTriangle className="w-[15px] h-[15px] text-red-500" />}
             value={
               <div className="text-[40px] text-red-500 leading-tight flex items-center gap-2">
                 {stats?.anomalyCount || 0}
@@ -104,7 +108,7 @@ export default function Dashboard() {
               </div>
             }
             subRow={
-              <div className="flex gap-2 mt-[6px]">
+              <div className="flex gap-2 mt-[2px]">
                 <Badge color="red">{criticalCount} Critical</Badge>
                 <Badge color="amber">{warningCount} Warnings</Badge>
               </div>
@@ -113,29 +117,29 @@ export default function Dashboard() {
           <KPICard
             accentColor="blue"
             label="AVG PER FLAT TODAY"
-            icon={<LucideBarChart2 className="w-[14px] h-[14px] text-blue-500" />}
+            icon={<LucideBarChart2 className="w-[15px] h-[15px] text-blue-500" />}
             value={`${stats?.avgConsumption?.toFixed(1) || '--'} kWh`}
             subRow={
-              <div className="mt-[10px]">
-                <div className="h-[4px] rounded-full bg-level-3 w-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
+              <div className="mt-2">
+                <div className="h-[5px] rounded-full bg-level-3 w-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-700"
                     style={{ width: `${Math.min(100, (stats?.avgConsumption / 20) * 100)}%` }}></div>
                 </div>
-                <div className="text-[12px] text-[var(--color-text-faint)] mt-2">Normal range: 12–20 kWh</div>
+                <div className="text-[11px] text-[var(--color-text-faint)] mt-1.5">Normal range: 12–20 kWh</div>
               </div>
             }
           />
           <KPICard
             accentColor="green"
             label="NEXT HOUR FORECAST"
-            icon={<LucideTrendingUp className="w-[14px] h-[14px] text-green-500" />}
+            icon={<LucideTrendingUp className="w-[15px] h-[15px] text-green-500" />}
             value={`${prediction?.predicted_units_kWh?.toFixed(1) || '--'} kWh`}
             subRow={
-              <div>
-                <div className="text-[12px] text-[var(--color-text-muted)] mt-1">
+              <div className="mt-1 space-y-1">
+                <div className="text-[12px] text-[var(--color-text-muted)]">
                   🔮 {stats?.mlConfidence ? `${(stats.mlConfidence * 100).toFixed(0)}%` : '94%'} ML confidence
                 </div>
-                <div className="text-[12px] text-[var(--color-text-faint)] mt-1">Refreshes in 8 min</div>
+                <div className="text-[11px] text-[var(--color-text-faint)]">Refreshes in 8 min</div>
               </div>
             }
           />
@@ -323,58 +327,7 @@ export default function Dashboard() {
   );
 }
 
-/* ── Sub-components ── */
-
-const KPICard = ({ accentColor, label, icon, value, change, changeColor, subRow }) => {
-  const gradients = {
-    amber: 'from-amber-500 to-amber-600',
-    red:   'from-red-500 to-red-600',
-    blue:  'from-blue-500 to-blue-600',
-    green: 'from-green-500 to-green-600',
-  };
-  const iconBgs = {
-    amber: 'bg-amber-500/10',
-    red:   'bg-red-500/10',
-    blue:  'bg-blue-500/10',
-    green: 'bg-green-500/10',
-  };
-  const valueColors = {
-    amber: 'text-amber-500',
-    red:   'text-red-500',
-    blue:  'text-blue-500',
-    green: 'text-green-500',
-  };
-
-  return (
-    <div className="bg-level-2 border border-subtle rounded-xl p-5 relative overflow-hidden
-      hover:border-blue-500/40 hover:shadow-blue-glow hover:-translate-y-[2px]
-      transition-all duration-200 cursor-default shadow-card">
-      {/* Accent top line */}
-      <div className={`absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r ${gradients[accentColor]}`}></div>
-
-      <div className="flex justify-between items-start">
-        <span className="text-[11px] text-[var(--color-text-faint)] font-semibold uppercase tracking-[0.08em]">{label}</span>
-        <div className={`w-[32px] h-[32px] rounded-lg flex justify-center items-center ${iconBgs[accentColor]}`}>
-          {icon}
-        </div>
-      </div>
-
-      <div className={`mt-3 font-mono font-bold text-[28px] leading-[32px] ${valueColors[accentColor]}`}>
-        {value}
-      </div>
-
-      {change && (
-        <div className="flex items-center gap-1 mt-[6px]">
-          <span className={`text-[12px] font-semibold ${changeColor === 'red' ? 'text-red-500' : 'text-green-500'}`}>
-            {change}
-          </span>
-        </div>
-      )}
-
-      {subRow}
-    </div>
-  );
-};
+/* ── Sub-components (Badge + TimePill remain local) ── */
 
 const TimePill = ({ label, active, onClick }) => (
   <button
