@@ -14,6 +14,7 @@ import {
   LucideLogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggle from '../ui/ThemeToggle';
 
 const NAV_ITEMS = [
   { id: 'dashboard',   label: 'Dashboard',    icon: LucideLayoutDashboard, path: '/dashboard' },
@@ -150,6 +151,11 @@ export default function AppShell() {
             </div>
             <span className="text-[12px] font-medium text-green-400">Live · Updated 2s ago</span>
           </div>
+
+          <div className="w-[1px] h-[24px] bg-gray-700"></div>
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
 
           <div className="w-[1px] h-[24px] bg-gray-700"></div>
 
