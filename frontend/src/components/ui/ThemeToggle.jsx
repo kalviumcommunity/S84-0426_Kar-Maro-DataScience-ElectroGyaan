@@ -1,5 +1,9 @@
 import { useTheme } from '../../context/ThemeContext';
 
+/**
+ * ThemeToggle — animated sun/moon pill button.
+ * Drop it anywhere in the UI; it reads/writes ThemeContext.
+ */
 export default function ThemeToggle({ className = '' }) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
@@ -20,12 +24,15 @@ export default function ThemeToggle({ className = '' }) {
         ${className}
       `}
     >
+      {/* Track icons */}
       <span className="absolute left-[6px] text-[11px] select-none pointer-events-none">
         {isDark ? '🌙' : ''}
       </span>
       <span className="absolute right-[6px] text-[11px] select-none pointer-events-none">
         {!isDark ? '☀️' : ''}
       </span>
+
+      {/* Sliding thumb */}
       <span
         className={`
           absolute top-[3px] w-[22px] h-[22px] rounded-full shadow-md

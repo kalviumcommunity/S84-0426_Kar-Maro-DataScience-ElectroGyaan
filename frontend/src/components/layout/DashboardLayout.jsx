@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LucideLayoutDashboard, LucideActivity, LucideAlertTriangle, LucideTrendingUp, LucideBuilding2, LucideFileText, LucideSettings, LucideHelpCircle, LucideLogOut, LucideChevronDown, LucideBell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggle from '../ui/ThemeToggle';
 
 const Topbar = () => {
   const { user } = useAuth();
@@ -21,11 +22,11 @@ const Topbar = () => {
   };
 
   return (
-    <div className="fixed left-[240px] right-0 top-0 h-[64px] bg-[rgba(10,15,30,0.9)] backdrop-blur-[12px] border-b border-subtle px-8 flex justify-between items-center z-50">
+    <div className="fixed left-[240px] right-0 top-0 h-[64px] bg-[var(--color-surface-topbar)] backdrop-blur-[12px] border-b border-subtle px-8 flex justify-between items-center z-50">
       <div className="flex items-center text-sm">
-        <span className="text-[16px] font-semibold text-white">{getPageTitle()}</span>
-        <span className="text-gray-600 mx-2">/</span>
-        <span className="text-[14px] text-gray-400 capitalize">{user?.role || 'User'} View</span>
+        <span className="text-[16px] font-semibold text-[var(--color-text-primary)]">{getPageTitle()}</span>
+        <span className="text-[var(--color-text-faint)] mx-2">/</span>
+        <span className="text-[14px] text-[var(--color-text-muted)] capitalize">{user?.role || 'User'} View</span>
       </div>
 
       <div className="flex items-center gap-4">
@@ -34,13 +35,18 @@ const Topbar = () => {
             <span className="absolute inline-flex h-3 w-3 rounded-full bg-green-500 opacity-30 animate-pulse-custom"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10B981]"></span>
           </div>
-          <span className="text-[12px] font-medium text-green-400">Live · Updated 2s ago</span>
+          <span className="text-[12px] font-medium text-green-500">Live · Updated 2s ago</span>
         </div>
 
-        <div className="h-[24px] w-[1px] bg-gray-700"></div>
+        <div className="h-[24px] w-[1px] bg-[var(--color-border-subtle)]"></div>
+
+        {/* Theme Toggle */}
+        <ThemeToggle />
+
+        <div className="h-[24px] w-[1px] bg-[var(--color-border-subtle)]"></div>
 
         <button className="relative w-[36px] h-[36px] flex items-center justify-center rounded-md hover:bg-level-3 group transition-colors">
-          <LucideBell className="w-[18px] h-[18px] text-gray-400 group-hover:text-white" />
+          <LucideBell className="w-[18px] h-[18px] text-[var(--color-text-muted)] group-hover:text-[var(--color-text-primary)]" />
           <span className="absolute top-[4px] right-[4px] w-[8px] h-[8px] bg-red-500 rounded-full flex items-center justify-center">
             <span className="text-[9px] text-white font-bold hidden">3</span>
           </span>
@@ -50,7 +56,7 @@ const Topbar = () => {
           <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[12px] text-white font-semibold">
             {user?.name?.substring(0, 2).toUpperCase() || 'U'}
           </div>
-          <LucideChevronDown className="w-[12px] h-[12px] text-gray-500" />
+          <LucideChevronDown className="w-[12px] h-[12px] text-[var(--color-text-faint)]" />
         </div>
       </div>
     </div>
@@ -71,7 +77,7 @@ const Sidebar = () => {
       {/* Header */}
       <div className="h-[64px] px-5 flex items-center gap-[10px] border-b border-subtle shrink-0">
         <span className="text-amber-400 font-bold text-[18px] drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]">⚡</span>
-        <span className="text-[16px] font-bold text-white tracking-tight">ElectroGyaan AI</span>
+        <span className="text-[16px] font-bold text-[var(--color-text-primary)] tracking-tight">ElectroGyaan AI</span>
       </div>
 
       {/* User Info Card */}
@@ -80,9 +86,9 @@ const Sidebar = () => {
           {user?.name?.substring(0, 2).toUpperCase() || 'U'}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[14px] font-semibold text-white truncate">{user?.name || 'User'}</div>
+          <div className="text-[14px] font-semibold text-[var(--color-text-primary)] truncate">{user?.name || 'User'}</div>
           <div className="flex items-center gap-[6px] mt-[2px]">
-            <span className="bg-[rgba(245,158,11,0.1)] border border-[rgba(245,158,11,0.3)] text-[12px] font-semibold text-amber-400 px-[8px] py-[2px] rounded-full capitalize">
+            <span className="bg-amber-500/10 border border-amber-500/30 text-[12px] font-semibold text-amber-500 px-[8px] py-[2px] rounded-full capitalize">
               {user?.role || 'user'}
             </span>
           </div>
@@ -91,7 +97,7 @@ const Sidebar = () => {
 
       {/* Nav */}
       <div className="px-2 flex-1">
-        <div className="text-[12px] text-gray-600 font-semibold uppercase tracking-[0.1em] p-[16px_12px_6px]">MAIN</div>
+        <div className="text-[12px] text-[var(--color-text-faint)] font-semibold uppercase tracking-[0.1em] p-[16px_12px_6px]">MAIN</div>
         <nav className="flex flex-col gap-[2px]">
           <NavItem to="/dashboard" icon={<LucideLayoutDashboard className="w-4 h-4" />} label="Dashboard" />
           
@@ -111,7 +117,7 @@ const Sidebar = () => {
             </>
           )}
           
-          <div className="h-[1px] bg-gray-800 my-[8px] mx-[12px]"></div>
+          <div className="h-[1px] bg-[var(--color-border-subtle)] my-[8px] mx-[12px]"></div>
           <NavItem to="/settings" icon={<LucideSettings className="w-4 h-4" />} label="Settings" />
         </nav>
       </div>
@@ -123,12 +129,12 @@ const Sidebar = () => {
             {user?.name?.substring(0, 2).toUpperCase() || 'U'}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[12px] font-semibold text-white truncate">{user?.name || 'User'}</div>
-            <div className="text-[12px] text-gray-500 truncate max-w-[140px]">{user?.email || 'user@example.com'}</div>
+            <div className="text-[12px] font-semibold text-[var(--color-text-primary)] truncate">{user?.name || 'User'}</div>
+            <div className="text-[12px] text-[var(--color-text-faint)] truncate max-w-[140px]">{user?.email || 'user@example.com'}</div>
           </div>
           <button 
             onClick={handleLogout}
-            className="w-[16px] h-[16px] text-gray-500 hover:text-red-400 cursor-pointer shrink-0 transition-colors"
+            className="w-[16px] h-[16px] text-[var(--color-text-faint)] hover:text-red-500 cursor-pointer shrink-0 transition-colors"
             title="Logout"
           >
             <LucideLogOut className="w-[16px] h-[16px]" />
@@ -147,17 +153,17 @@ const NavItem = ({ to, icon, label, badge }) => {
   const props = to ? { to } : {};
 
   return (
-    <Wrapper {...props} className={`h-[36px] px-[12px] rounded-md flex items-center justify-between cursor-pointer transition-all duration-150 group ${active ? 'bg-[rgba(37,99,235,0.12)] border-l-[2px] border-blue-500 -ml-[2px]' : 'hover:bg-level-2'}`}>
+    <Wrapper {...props} className={`h-[36px] px-[12px] rounded-md flex items-center justify-between cursor-pointer transition-all duration-150 group ${active ? 'bg-blue-500/10 border-l-[2px] border-blue-500 -ml-[2px]' : 'hover:bg-level-2'}`}>
       <div className="flex items-center gap-[10px]">
-        <div className={`${active ? 'text-blue-400' : 'text-gray-500 group-hover:text-gray-300'}`}>
+        <div className={`${active ? 'text-blue-500' : 'text-[var(--color-text-faint)] group-hover:text-[var(--color-text-secondary)]'}`}>
           {icon}
         </div>
-        <span className={`text-[14px] ${active ? 'text-blue-400 font-semibold' : 'text-gray-400 font-medium group-hover:text-gray-200'}`}>
+        <span className={`text-[14px] ${active ? 'text-blue-500 font-semibold' : 'text-[var(--color-text-muted)] font-medium group-hover:text-[var(--color-text-primary)]'}`}>
           {label}
         </span>
       </div>
       {badge && (
-        <span className="bg-red-900 text-red-400 text-[10px] min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 font-bold">
+        <span className="bg-red-500/15 text-red-500 text-[10px] min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 font-bold border border-red-500/30">
           {badge}
         </span>
       )}
@@ -167,11 +173,10 @@ const NavItem = ({ to, icon, label, badge }) => {
 
 export default function DashboardLayout({ children }) {
   return (
-    <div className="min-h-screen bg-level-0 font-inter text-white">
+    <div className="min-h-screen bg-level-0 font-inter text-[var(--color-text-primary)]">
       <Sidebar />
       <Topbar />
-      <main className="ml-[240px] mt-[64px] min-h-[calc(100vh-64px)] overflow-x-hidden bg-[#0A0F1E]">
-        {/* Render child pages here */}
+      <main className="ml-[240px] mt-[64px] min-h-[calc(100vh-64px)] overflow-x-hidden bg-level-0">
         {children}
       </main>
     </div>
