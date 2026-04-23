@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AnimatedGrid from '../../components/ui/AnimatedGrid';
+import ThemeToggle from '../../components/ui/ThemeToggle';
 import { 
   LucideZap, LucideArrowRight, LucidePlay, LucideActivity, 
   LucideTrendingUp, LucideBell, LucidePlug, LucideBrainCircuit,
@@ -106,24 +107,25 @@ const shuffleIndexes = (count) => {
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-[#0A0F1E] font-inter text-white overflow-hidden">
+    <div className="min-h-screen bg-level-0 font-inter text-[var(--color-text-primary)] overflow-hidden transition-colors duration-300">
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 h-[64px] bg-[rgba(10,15,30,0.85)] z-[100] px-[80px] flex justify-between items-center">
+      <nav className="fixed top-0 left-0 right-0 h-[64px] bg-[var(--color-surface-topbar)] z-[100] px-[80px] flex justify-between items-center border-b border-subtle">
         <div className="w-[200px] flex items-center gap-2">
           <LucideZap className="w-5 h-5 text-amber-400 drop-shadow-[0_0_20px_rgba(245,158,11,0.2)]" />
-          <span className="text-[18px] font-bold text-white tracking-tight">ElectroGyaan</span>
-          <span className="text-[12px] text-blue-400 align-super ml-[1px]">AI</span>
+          <span className="text-[18px] font-bold text-[var(--color-text-primary)] tracking-tight">ElectroGyaan</span>
+          <span className="text-[12px] text-blue-500 align-super ml-[1px]">AI</span>
         </div>
         <div className="flex gap-[32px]">
-          <a href="#features" className="text-[14px] font-medium text-gray-300 hover:text-white transition-colors duration-150">Features</a>
-          <a href="#how-it-works" className="text-[14px] font-medium text-gray-300 hover:text-white transition-colors duration-150">How It Works</a>
-          <a href="#docs" className="text-[14px] font-medium text-gray-300 hover:text-white transition-colors duration-150">Docs</a>
+          <a href="#features" className="text-[14px] font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors duration-150">Features</a>
+          <a href="#how-it-works" className="text-[14px] font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors duration-150">How It Works</a>
+          <a href="#docs" className="text-[14px] font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors duration-150">Docs</a>
         </div>
         <div className="flex items-center gap-[12px]">
-          <Link to="/login" className="h-[36px] flex items-center px-[16px] text-[14px] text-gray-300 font-medium hover:text-white border border-transparent hover:border-strong hover:bg-level-3 rounded-md transition-all">
+          <ThemeToggle />
+          <Link to="/login" className="h-[36px] flex items-center px-[16px] text-[14px] text-[var(--color-text-secondary)] font-medium hover:text-[var(--color-text-primary)] border border-transparent hover:border-subtle hover:bg-level-3 rounded-md transition-all">
             Log In
           </Link>
-          <Link to="/login" className="h-[36px] px-[16px] text-[14px] font-semibold text-white bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 rounded-md hover:shadow-[0_0_20px_rgba(59,130,246,0.25)] flex items-center transition-all active:scale-95">
+          <Link to="/login" className="h-[36px] px-[16px] text-[14px] font-semibold text-white bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 rounded-md hover:shadow-blue-glow flex items-center transition-all active:scale-95">
             Get Started <LucideArrowRight className="w-[14px] h-[14px] ml-[6px]" />
           </Link>
         </div>
@@ -147,51 +149,47 @@ export default function Landing() {
             </div>
 
             <h1 className="mt-[20px] text-[56px] leading-[64px] font-extrabold tracking-[-0.03em] h-[192px]">
-              <div className="text-white">Smart Energy</div>
+              <div className="text-[var(--color-text-primary)]">Smart Energy</div>
               <div className="gradient-text">Intelligence for</div>
-              <div className="text-white">Modern Societies</div>
+              <div className="text-[var(--color-text-primary)]">Modern Societies</div>
             </h1>
 
-            <p className="mt-[24px] text-[18px] leading-[28px] text-gray-400 font-normal max-w-[460px]">
+            <p className="mt-[24px] text-[18px] leading-[28px] text-[var(--color-text-muted)] font-normal max-w-[460px]">
               Real-time anomaly detection, AI-powered forecasting, and live dashboards — purpose built for 50–500 apartment communities across India.
             </p>
 
             <div className="mt-[40px] flex gap-[14px]">
-              <Link to="/login" className="h-[48px] px-[28px] text-[16px] font-semibold text-white bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 rounded-md hover:shadow-[0_0_20px_rgba(59,130,246,0.25)] flex items-center transition-all active:scale-95">
+              <Link to="/login" className="h-[48px] px-[28px] text-[16px] font-semibold text-white bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 rounded-md hover:shadow-blue-glow flex items-center transition-all active:scale-95">
                 Get Started <LucideArrowRight className="w-[16px] h-[16px] ml-[8px]" />
               </Link>
-              <button className="h-[48px] px-[24px] rounded-md border border-default text-gray-300 hover:border-strong hover:bg-level-3 hover:text-white flex items-center transition-all">
-                <div className="w-[24px] h-[24px] bg-white/10 rounded-full flex items-center justify-center mr-[8px]">
-                  <LucidePlay className="w-[10px] h-[10px] text-white ml-[2px]" fill="currentColor" />
+              <button className="h-[48px] px-[24px] rounded-md border border-subtle text-[var(--color-text-secondary)] hover:border-strong hover:bg-level-3 hover:text-[var(--color-text-primary)] flex items-center transition-all">
+                <div className="w-[24px] h-[24px] bg-[var(--color-border-subtle)] rounded-full flex items-center justify-center mr-[8px]">
+                  <LucidePlay className="w-[10px] h-[10px] text-[var(--color-text-primary)] ml-[2px]" fill="currentColor" />
                 </div>
                 Watch Demo
-                <span className="ml-[8px] text-gray-500 font-mono text-[14px]">2:34</span>
+                <span className="ml-[8px] text-[var(--color-text-faint)] font-mono text-[14px]">2:34</span>
               </button>
             </div>
 
             {/* SOCIAL PROOF */}
             <div className="mt-[48px] flex items-center gap-[16px]">
-              {/* Avatar Stack */}
               <div className="flex -space-x-2">
-                <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-blue-600 border-2 border-[#0A0F1E] flex items-center justify-center text-[12px] font-bold text-white">RK</div>
-                <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-amber-500 to-amber-600 border-2 border-[#0A0F1E] flex items-center justify-center text-[12px] font-bold text-white">SM</div>
-                <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-green-500 to-green-600 border-2 border-[#0A0F1E] flex items-center justify-center text-[12px] font-bold text-white">AP</div>
-                <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-purple-500 to-purple-600 border-2 border-[#0A0F1E] flex items-center justify-center text-[12px] font-bold text-white">VK</div>
-                <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-pink-500 to-pink-600 border-2 border-[#0A0F1E] flex items-center justify-center text-[12px] font-bold text-white">NK</div>
+                <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-blue-600 border-2 border-[var(--color-level-0)] flex items-center justify-center text-[12px] font-bold text-white">RK</div>
+                <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-amber-500 to-amber-600 border-2 border-[var(--color-level-0)] flex items-center justify-center text-[12px] font-bold text-white">SM</div>
+                <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-green-500 to-green-600 border-2 border-[var(--color-level-0)] flex items-center justify-center text-[12px] font-bold text-white">AP</div>
+                <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-purple-500 to-purple-600 border-2 border-[var(--color-level-0)] flex items-center justify-center text-[12px] font-bold text-white">VK</div>
+                <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-pink-500 to-pink-600 border-2 border-[var(--color-level-0)] flex items-center justify-center text-[12px] font-bold text-white">NK</div>
               </div>
-              
               <div className="flex flex-col">
-                <span className="text-[14px] font-semibold text-white">120+ housing societies</span>
-                <span className="text-[14px] text-gray-400">trust ElectroGyaan for energy monitoring</span>
+                <span className="text-[14px] font-semibold text-[var(--color-text-primary)]">120+ housing societies</span>
+                <span className="text-[14px] text-[var(--color-text-muted)]">trust ElectroGyaan for energy monitoring</span>
               </div>
-              
-              <div className="w-[1px] h-[32px] bg-gray-700"></div>
-              
+              <div className="w-[1px] h-[32px] bg-[var(--color-border-subtle)]"></div>
               <div className="flex items-center gap-[6px]">
                 {[...Array(5)].map((_, i) => (
                   <span key={i} className="text-amber-400 text-[14px]">★</span>
                 ))}
-                <span className="text-[12px] text-gray-400 ml-[6px]">4.9/5 rating</span>
+                <span className="text-[12px] text-[var(--color-text-muted)] ml-[6px]">4.9/5 rating</span>
               </div>
             </div>
           </div>
@@ -208,22 +206,22 @@ export default function Landing() {
       <div className="h-[80px] bg-level-1 border-t border-b border-subtle flex">
         <div className="flex-1 flex justify-center items-center">
           <div className="text-center">
-            <div className="text-[24px] font-mono font-bold text-amber-400">36,000+</div>
-            <div className="text-[12px] text-gray-500 uppercase tracking-widest mt-1">Readings Processed Monthly</div>
+            <div className="text-[24px] font-mono font-bold text-amber-500">36,000+</div>
+            <div className="text-[12px] text-[var(--color-text-faint)] uppercase tracking-widest mt-1">Readings Processed Monthly</div>
           </div>
         </div>
-        <div className="w-[1px] h-[36px] bg-gray-800 my-auto"></div>
+        <div className="w-[1px] h-[36px] bg-[var(--color-border-subtle)] my-auto"></div>
         <div className="flex-1 flex justify-center items-center">
           <div className="text-center">
-            <div className="text-[24px] font-mono font-bold text-green-400">98.5%</div>
-            <div className="text-[12px] text-gray-500 uppercase tracking-widest mt-1">Platform Uptime SLA</div>
+            <div className="text-[24px] font-mono font-bold text-green-500">98.5%</div>
+            <div className="text-[12px] text-[var(--color-text-faint)] uppercase tracking-widest mt-1">Platform Uptime SLA</div>
           </div>
         </div>
-        <div className="w-[1px] h-[36px] bg-gray-800 my-auto"></div>
+        <div className="w-[1px] h-[36px] bg-[var(--color-border-subtle)] my-auto"></div>
         <div className="flex-1 flex justify-center items-center">
           <div className="text-center">
-            <div className="text-[24px] font-mono font-bold text-blue-400">&lt;200ms</div>
-            <div className="text-[12px] text-gray-500 uppercase tracking-widest mt-1">Average Ingest Latency</div>
+            <div className="text-[24px] font-mono font-bold text-blue-500">&lt;200ms</div>
+            <div className="text-[12px] text-[var(--color-text-faint)] uppercase tracking-widest mt-1">Average Ingest Latency</div>
           </div>
         </div>
       </div>
@@ -233,9 +231,9 @@ export default function Landing() {
       <section id="features" className="py-[96px] px-[80px] max-w-[1280px] mx-auto">
         <ScrollReveal delay={60}>
         <div className="text-center mb-[64px]">
-          <div className="text-[12px] text-blue-400 font-bold uppercase tracking-[0.12em] mb-[12px]">CAPABILITIES</div>
-          <h2 className="text-[36px] font-bold text-white mb-4">Everything you need to monitor energy at scale</h2>
-          <p className="text-[18px] text-gray-400 max-w-[560px] mx-auto">Built for facilities managers, society secretaries, and engineers.</p>
+          <div className="text-[12px] text-blue-500 font-bold uppercase tracking-[0.12em] mb-[12px]">CAPABILITIES</div>
+          <h2 className="text-[36px] font-bold text-[var(--color-text-primary)] mb-4">Everything you need to monitor energy at scale</h2>
+          <p className="text-[18px] text-[var(--color-text-muted)] max-w-[560px] mx-auto">Built for facilities managers, society secretaries, and engineers.</p>
         </div>
         </ScrollReveal>
 
@@ -296,8 +294,8 @@ export default function Landing() {
         <div className="max-w-[1280px] mx-auto">
           <ScrollReveal delay={50}>
           <div className="text-center mb-[64px]">
-            <div className="text-[12px] text-blue-400 font-bold uppercase tracking-[0.12em] mb-[12px]">PROCESS</div>
-            <h2 className="text-[36px] font-bold text-white">From meter to insight in milliseconds</h2>
+            <div className="text-[12px] text-blue-500 font-bold uppercase tracking-[0.12em] mb-[12px]">PROCESS</div>
+            <h2 className="text-[36px] font-bold text-[var(--color-text-primary)]">From meter to insight in milliseconds</h2>
           </div>
           </ScrollReveal>
 
@@ -343,8 +341,8 @@ export default function Landing() {
         <div className="max-w-[1280px] mx-auto">
           <ScrollReveal delay={60}>
           <div className="text-center">
-            <h2 className="text-[42px] leading-[52px] font-bold text-white">Ready to optimize your infrastructure?</h2>
-            <p className="mt-4 text-[20px] leading-[32px] text-gray-300 max-w-[760px] mx-auto">Deploy AI-driven monitoring, anomaly detection, and forecasting for every apartment block in your society.</p>
+            <h2 className="text-[42px] leading-[52px] font-bold text-[var(--color-text-primary)]">Ready to optimize your infrastructure?</h2>
+            <p className="mt-4 text-[20px] leading-[32px] text-[var(--color-text-muted)] max-w-[760px] mx-auto">Deploy AI-driven monitoring, anomaly detection, and forecasting for every apartment block in your society.</p>
             <div className="mt-10 flex flex-wrap justify-center items-center gap-4">
               <Link to="/login" className="inline-flex h-[56px] min-w-[220px] px-[34px] text-[18px] font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 rounded-lg hover:shadow-[0_0_24px_rgba(59,130,246,0.32)] items-center justify-center transition-all active:scale-95">
                 Get Started Now
@@ -363,51 +361,51 @@ export default function Landing() {
               <div className="col-span-12 lg:col-span-4">
                 <div className="flex items-center gap-2">
                   <LucideZap className="w-5 h-5 text-amber-400" />
-                  <span className="font-semibold text-gray-200 text-[28px] leading-none">ElectroGyaan AI</span>
+                  <span className="font-semibold text-[var(--color-text-primary)] text-[28px] leading-none">ElectroGyaan AI</span>
                 </div>
-                <p className="mt-4 text-[16px] leading-7 text-gray-400">Smart energy intelligence platform for modern societies. Monitor usage, detect anomalies, and forecast demand in real-time.</p>
+                <p className="mt-4 text-[16px] leading-7 text-[var(--color-text-muted)]">Smart energy intelligence platform for modern societies. Monitor usage, detect anomalies, and forecast demand in real-time.</p>
               </div>
 
               <div className="col-span-6 sm:col-span-4 lg:col-span-2">
-                <div className="text-[12px] uppercase tracking-[0.12em] text-gray-500 mb-4">Platform</div>
+                <div className="text-[12px] uppercase tracking-[0.12em] text-[var(--color-text-faint)] mb-4">Platform</div>
                 <div className="space-y-3 text-[16px]">
-                  <a href="#features" className="block text-gray-400 hover:text-white transition-colors">Features</a>
-                  <a href="#how-it-works" className="block text-gray-400 hover:text-white transition-colors">How It Works</a>
-                  <a id="docs" href="#" className="block text-gray-400 hover:text-white transition-colors">Docs</a>
+                  <a href="#features" className="block text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">Features</a>
+                  <a href="#how-it-works" className="block text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">How It Works</a>
+                  <a id="docs" href="#" className="block text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">Docs</a>
                 </div>
               </div>
 
               <div className="col-span-6 sm:col-span-4 lg:col-span-2">
-                <div className="text-[12px] uppercase tracking-[0.12em] text-gray-500 mb-4">Company</div>
+                <div className="text-[12px] uppercase tracking-[0.12em] text-[var(--color-text-faint)] mb-4">Company</div>
                 <div className="space-y-3 text-[16px]">
-                  <a href="#" className="block text-gray-400 hover:text-white transition-colors">Privacy</a>
-                  <a href="#" className="block text-gray-400 hover:text-white transition-colors">Terms</a>
-                  <a href="#" className="block text-gray-400 hover:text-white transition-colors">Contact</a>
+                  <a href="#" className="block text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">Privacy</a>
+                  <a href="#" className="block text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">Terms</a>
+                  <a href="#" className="block text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">Contact</a>
                 </div>
               </div>
 
               <div className="col-span-12 sm:col-span-4 lg:col-span-4">
-                <div className="text-[12px] uppercase tracking-[0.12em] text-gray-500 mb-4">Realtime Snapshot</div>
+                <div className="text-[12px] uppercase tracking-[0.12em] text-[var(--color-text-faint)] mb-4">Realtime Snapshot</div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="rounded-lg border border-blue-500/25 bg-blue-500/10 p-3">
-                    <div className="text-[11px] text-gray-400">Flats</div>
-                    <div className="text-[20px] leading-6 font-mono text-white">50</div>
+                    <div className="text-[11px] text-[var(--color-text-faint)]">Flats</div>
+                    <div className="text-[20px] leading-6 font-mono text-[var(--color-text-primary)]">50</div>
                   </div>
                   <div className="rounded-lg border border-green-500/25 bg-green-500/10 p-3">
-                    <div className="text-[11px] text-gray-400">Uptime</div>
-                    <div className="text-[20px] leading-6 font-mono text-white">98.5%</div>
+                    <div className="text-[11px] text-[var(--color-text-faint)]">Uptime</div>
+                    <div className="text-[20px] leading-6 font-mono text-[var(--color-text-primary)]">98.5%</div>
                   </div>
                   <div className="rounded-lg border border-amber-500/25 bg-amber-500/10 p-3">
-                    <div className="text-[11px] text-gray-400">Latency</div>
-                    <div className="text-[20px] leading-6 font-mono text-white">&lt;200ms</div>
+                    <div className="text-[11px] text-[var(--color-text-faint)]">Latency</div>
+                    <div className="text-[20px] leading-6 font-mono text-[var(--color-text-primary)]">&lt;200ms</div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="mt-10 pt-5 border-t border-subtle flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2">
-              <div className="text-[13px] text-gray-500">© 2026 ElectroGyaan AI</div>
-              <div className="text-[13px] text-gray-600">Powering data-driven energy decisions for housing communities</div>
+              <div className="text-[13px] text-[var(--color-text-faint)]">© 2026 ElectroGyaan AI</div>
+              <div className="text-[13px] text-[var(--color-text-faint)]">Powering data-driven energy decisions for housing communities</div>
             </div>
           </footer>
           </ScrollReveal>
@@ -552,16 +550,16 @@ const DashboardMockup = () => {
       
       {/* Floating Stat Card A - Bottom Left */}
       <div className="absolute bottom-[-20px] left-[-18px] sm:left-[-40px] w-[160px] h-[72px] bg-level-3 border border-blue-400/40 rounded-lg shadow-blue-glow p-3">
-        <div className="text-[10px] text-gray-400">🚨 Active Anomaly</div>
-        <div className="text-[12px] text-white font-semibold mt-1">Flat {activeFlat.flatId} · {highlightAnomaly.kwh.toFixed(1)} kWh</div>
-        <div className="text-[9px] text-gray-500 mt-1">3 seconds ago</div>
+        <div className="text-[10px] text-[var(--color-text-faint)]">🚨 Active Anomaly</div>
+        <div className="text-[12px] text-[var(--color-text-primary)] font-semibold mt-1">Flat {activeFlat.flatId} · {highlightAnomaly.kwh.toFixed(1)} kWh</div>
+        <div className="text-[9px] text-[var(--color-text-faint)] mt-1">3 seconds ago</div>
       </div>
       
       {/* Floating Stat Card B - Top Right */}
       <div className="absolute top-[-20px] right-[-10px] sm:right-[-30px] w-[180px] h-[68px] bg-level-3 border border-amber-400/40 rounded-lg shadow-amber-glow p-3">
-        <div className="text-[10px] text-gray-400">🔮 Next Hour Forecast</div>
-        <div className="text-[20px] text-amber-400 font-mono font-bold mt-1">{activeFlat.fcst.toFixed(1)} <span className="text-[12px] text-gray-400">kWh</span></div>
-        <div className="text-[9px] text-red-400 mt-1">{forecastDirection} {forecastDeltaPercent}% vs last hour</div>
+        <div className="text-[10px] text-[var(--color-text-faint)]">🔮 Next Hour Forecast</div>
+        <div className="text-[20px] text-amber-500 font-mono font-bold mt-1">{activeFlat.fcst.toFixed(1)} <span className="text-[12px] text-[var(--color-text-faint)]">kWh</span></div>
+        <div className="text-[9px] text-red-500 mt-1">{forecastDirection} {forecastDeltaPercent}% vs last hour</div>
       </div>
     </div>
   );
@@ -569,24 +567,24 @@ const DashboardMockup = () => {
 
 // Feature Card Component
 const FeatureCard = ({ icon: Icon, color, bg, border, title, desc }) => (
-  <div className="p-[28px_24px] bg-level-2 border border-subtle rounded-2xl hover:border-blue-400/50 hover:-translate-y-[2px] hover:shadow-blue-glow transition-all duration-[250ms] cubic-bezier(0.4,0,0.2,1) group">
+  <div className="p-[28px_24px] bg-level-2 border border-subtle rounded-2xl hover:border-blue-500/40 hover:-translate-y-[2px] hover:shadow-blue-glow transition-all duration-[250ms] group shadow-card">
     <div className={`w-[48px] h-[48px] ${bg} ${border} border rounded-lg flex items-center justify-center mb-4`}>
       <Icon className={`w-[20px] h-[20px] ${color}`} />
     </div>
-    <h3 className="text-[18px] font-semibold text-white mb-2 group-hover:text-blue-400 transition-colors">{title}</h3>
-    <p className="text-[14px] text-gray-400 leading-[22px]">{desc}</p>
+    <h3 className="text-[18px] font-semibold text-[var(--color-text-primary)] mb-2 group-hover:text-blue-500 transition-colors">{title}</h3>
+    <p className="text-[14px] text-[var(--color-text-muted)] leading-[22px]">{desc}</p>
   </div>
 );
 
 // Process Step Component
-const ProcessStep = ({ number, icon: Icon, title, desc, iconColor = "text-gray-300" }) => (
+const ProcessStep = ({ number, icon: Icon, title, desc, iconColor = "text-[var(--color-text-secondary)]" }) => (
   <div className="flex flex-col items-center text-center w-[220px] relative z-10">
-    <div className="w-[48px] h-[48px] bg-level-2 border border-blue-400/40 rounded-full flex items-center justify-center text-[24px] font-extrabold text-blue-400 shadow-blue-glow mb-4">
+    <div className="w-[48px] h-[48px] bg-level-2 border border-blue-500/40 rounded-full flex items-center justify-center text-[24px] font-extrabold text-blue-500 shadow-blue-glow mb-4">
       {number}
     </div>
     <Icon className={`w-[32px] h-[32px] ${iconColor} mb-3`} />
-    <h4 className="text-[18px] font-semibold text-white mb-2">{title}</h4>
-    <p className="text-[14px] text-gray-400 max-w-[180px]">{desc}</p>
+    <h4 className="text-[18px] font-semibold text-[var(--color-text-primary)] mb-2">{title}</h4>
+    <p className="text-[14px] text-[var(--color-text-muted)] max-w-[180px]">{desc}</p>
   </div>
 );
 
