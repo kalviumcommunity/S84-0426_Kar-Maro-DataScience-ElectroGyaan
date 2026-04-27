@@ -80,8 +80,6 @@
   --shadow-red-glow:  0 0 16px rgba(239,68,68,0.30);
 }
 
-.light {
-  --color-level-0: #EEF2F7;
 /* ── LIGHT THEME OVERRIDES ── */
 .light {
   /* Background levels — light grays */
@@ -264,8 +262,6 @@
     background: linear-gradient(135deg, var(--color-blue-600) 0%, var(--color-blue-700) 100%);
     transition: all 150ms ease;
   }
-  .btn-primary:hover { background: var(--color-blue-500); box-shadow: var(--shadow-blue-glow); }
-  .btn-primary:active { transform: scale(0.98); }
   .btn-primary:hover {
     background: var(--color-blue-500);
     box-shadow: var(--shadow-blue-glow);
@@ -290,7 +286,6 @@
     background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
     transition: all 150ms ease;
   }
-  .btn-danger:hover { background: #DC2626; box-shadow: var(--shadow-red-glow); }
   .btn-danger:hover  { background: #DC2626; box-shadow: var(--shadow-red-glow); }
   .btn-danger:active { transform: scale(0.98); }
 
@@ -337,14 +332,6 @@
     background-repeat: no-repeat;
     background-position: right 12px center;
     padding-right: 36px;
-  .btn-icon:hover {
-    background-color: var(--color-level-3);
-    border-color: var(--color-border-strong);
-  }
-
-  /* ── Card hover ── */
-  .card-hover {
-    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   }
   .light select.auth-input {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
@@ -357,6 +344,7 @@
     border-color: rgba(59, 130, 246, 0.4);
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
   }
+}
 
   /* ── Gradient text ── */
   .gradient-text {

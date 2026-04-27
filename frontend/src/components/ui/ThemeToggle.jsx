@@ -32,6 +32,7 @@ export default function ThemeToggle({ className = '' }) {
       <span className="absolute select-none pointer-events-none text-[11px]"
         style={{ [isDark ? 'right' : 'left']: 6 }}>
         {isDark ? '☀️' : '🌙'}
+      </span>
       {/* Track icons */}
       <span className="absolute left-[6px] text-[11px] select-none pointer-events-none">
         {isDark ? '🌙' : ''}

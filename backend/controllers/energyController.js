@@ -127,11 +127,15 @@ exports.getPrediction = async (req, res) => {
 exports.getStats = async (req, res) => {
   try {
     const { flatId } = req.params;
-    const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    
+    // Changing from last24h to start of month for consumption
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
 
     const records = await EnergyData.find({
       flatId,
-      timestamp: { $gte: last24h }
+      timestamp: { $gte: startOfMonth }
     }).lean();
 
     const totalConsumption = records.reduce((sum, r) => sum + r.units_kWh, 0);

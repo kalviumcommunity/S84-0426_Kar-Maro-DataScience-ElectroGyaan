@@ -2,10 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { LucideAlertTriangle, LucideClock, LucideCheckCircle, LucideSearch, LucideArrowUpDown, LucideArrowUp, LucideRefreshCw } from 'lucide-react';
 import apiClient from '../../api/apiClient';
+import { useAuth } from '../../context/AuthContext';
 
 const PAGE_SIZE = 15;
 
 export default function AnomalyLog() {
+  const { user } = useAuth();
+  const flatId = user?.role === 'admin' ? 'all' : (user?.flatId || user?.name || 'A101');
   const [anomalies, setAnomalies] = useState([]);
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
@@ -17,7 +20,7 @@ export default function AnomalyLog() {
   const fetchAnomalies = useCallback(async (p = 1) => {
     setLoading(true);
     try {
-      const res = await apiClient.get(`/api/energy/anomalies/all?page=${p}&limit=${PAGE_SIZE}`);
+      const res = await apiClient.get(`/api/energy/anomalies/${flatId}?page=${p}&limit=${PAGE_SIZE}`);
       setAnomalies(res.data.data || []);
       setTotal(res.data.total || 0);
       setPages(res.data.pages || 1);
@@ -27,7 +30,7 @@ export default function AnomalyLog() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [flatId]);
 
   useEffect(() => {
     fetchAnomalies(1);
@@ -81,18 +84,21 @@ export default function AnomalyLog() {
 
         {/* FILTER BAR */}
         <div className="mt-6 bg-level-2 border border-subtle rounded-xl p-[16px_20px] flex items-center gap-4 flex-wrap">
-          <div className="relative w-[240px]">
-            <LucideSearch className="w-[15px] h-[15px] text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search flat ID..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="h-[36px] w-full bg-level-1 border border-subtle rounded-md pl-9 pr-3 text-[14px] text-gray-100 placeholder-gray-500 hover:border-strong focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <div className="w-[1px] h-[24px] bg-gray-700"></div>
+          {user?.role === 'admin' && (
+            <>
+              <div className="relative w-[240px]">
+                <LucideSearch className="w-[15px] h-[15px] text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search flat ID..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="h-[36px] w-full bg-level-1 border border-subtle rounded-md pl-9 pr-3 text-[14px] text-gray-100 placeholder-gray-500 hover:border-strong focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div className="w-[1px] h-[24px] bg-gray-700"></div>
+            </>
+          )}
 
           <div className="flex gap-[6px]">
             {['All', 'Today', 'This Week', 'Month'].map(label => (

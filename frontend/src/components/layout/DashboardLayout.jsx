@@ -5,8 +5,10 @@ import { useAuth } from '../../context/AuthContext';
 import ThemeToggle from '../ui/ThemeToggle';
 
 const Topbar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [showDropdown, setShowDropdown] = React.useState(false);
   
   // Get page title from current route
   const getPageTitle = () => {
@@ -52,11 +54,45 @@ const Topbar = () => {
           </span>
         </button>
 
-        <div className="flex items-center gap-2 cursor-pointer">
-          <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[12px] text-white font-semibold">
-            {user?.name?.substring(0, 2).toUpperCase() || 'U'}
-          </div>
-          <LucideChevronDown className="w-[12px] h-[12px] text-[var(--color-text-faint)]" />
+        <div className="relative">
+          <div 
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => setShowDropdown(!showDropdown)}
+          >
+                <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[12px] text-white font-semibold">
+                  {user?.name?.substring(0, 2).toUpperCase() || 'U'}
+                </div>
+                <LucideChevronDown className="w-[12px] h-[12px] text-[var(--color-text-faint)] group-hover:text-[var(--color-text-primary)] transition-colors" />
+              </div>
+              
+              {showDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-level-1 border border-subtle rounded-md shadow-lg py-1 z-50">
+                  <div className="px-4 py-2 border-b border-subtle overflow-hidden">
+                    <p className="text-[14px] font-medium text-[var(--color-text-primary)] truncate">{user?.name || 'User'}</p>
+                    <p className="text-[12px] text-[var(--color-text-faint)] truncate">{user?.email || 'user@example.com'}</p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setShowDropdown(false);
+                      navigate('/settings');
+                    }}
+                    className="w-full text-left px-4 py-2 text-[14px] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-level-2 transition-colors flex items-center gap-2"
+                  >
+                    <LucideSettings className="w-4 h-4" /> Settings
+                  </button>
+                  <button 
+                    onClick={async () => {
+                      setShowDropdown(false);
+                      await logout();
+                      navigate('/login');
+                    }}
+                    className="w-full text-left px-4 py-2 text-[14px] text-red-500 hover:bg-level-2 transition-colors flex items-center gap-2"
+                  >
+                <LucideLogOut className="w-[14px] h-[14px]" />
+                Log out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -102,19 +138,14 @@ const Sidebar = () => {
           <NavItem to="/dashboard" icon={<LucideLayoutDashboard className="w-4 h-4" />} label="Dashboard" />
           
           {/* Admin-only navigation */}
-          {user?.role === 'admin' && (
+          {user?.role === 'admin' ? (
             <>
               <NavItem to="/apartments" icon={<LucideBuilding2 className="w-4 h-4" />} label="Apartments" />
               <NavItem to="/anomalies" icon={<LucideAlertTriangle className="w-4 h-4" />} label="Anomaly Log" />
               <NavItem to="/reports" icon={<LucideFileText className="w-4 h-4" />} label="Reports" />
             </>
-          )}
-          
-          {/* User-only navigation */}
-          {user?.role === 'user' && (
-            <>
-              <NavItem to="/anomalies" icon={<LucideAlertTriangle className="w-4 h-4" />} label="My Anomalies" />
-            </>
+          ) : (
+            <NavItem to="/anomalies" icon={<LucideAlertTriangle className="w-4 h-4" />} label="My Anomalies" />
           )}
           
           <div className="h-[1px] bg-[var(--color-border-subtle)] my-[8px] mx-[12px]"></div>
