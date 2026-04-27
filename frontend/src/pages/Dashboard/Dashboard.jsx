@@ -10,10 +10,13 @@ import {
 import { useEnergyData } from '../../hooks/useEnergyData';
 import MemeAlertModal from '../../components/MemeAlertModal';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import KPICard from '../../components/ui/KPICard';
 
 export default function Dashboard() {
-  const { energyData, stats, anomalies, prediction, loading, error, newAnomalyDetected } = useEnergyData('A101');
+  const { user } = useAuth();
+  const flatId = user?.flatId || user?.name || 'A101';
+  const { energyData, stats, anomalies, prediction, loading, error, newAnomalyDetected } = useEnergyData(flatId);
   const [showMeme, setShowMeme] = useState(false);
   const [activeTimePill, setActiveTimePill] = useState('1H');
   const { isDark } = useTheme();
@@ -88,13 +91,13 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 w-full">
           <KPICard
             accentColor="amber"
-            label="TODAY'S CONSUMPTION"
+            label="THIS MONTH'S CONSUMPTION"
             icon={<LucideZap className="w-[15px] h-[15px] text-amber-500" />}
             value={<>{stats?.totalConsumption?.toFixed(1) || '--'} <span className="text-[14px] text-[var(--color-text-muted)] font-inter">kWh</span></>}
             trend={stats?.totalConsumption > 0 ? {
               value: `${((stats.totalConsumption / 800) * 100 - 100).toFixed(1)}%`,
               direction: 'up',
-              label: 'vs yesterday'
+              label: 'vs last month'
             } : undefined}
           />
           <KPICard
@@ -152,19 +155,14 @@ export default function Dashboard() {
               <h2 className="text-[18px] font-semibold font-inter text-[var(--color-text-primary)]">
                 Real-Time Consumption Monitor
               </h2>
-              <p className="text-[13px] text-[var(--color-text-muted)] mt-[2px]">Last 50 readings — all apartments</p>
+              <p className="text-[13px] text-[var(--color-text-muted)] mt-[2px]">Last 50 readings — Apartment {flatId}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <button className="h-[34px] px-3 bg-level-1 border border-subtle rounded-md text-[13px] text-[var(--color-text-secondary)] flex items-center gap-2 hover:bg-level-3 transition-colors">
                 <LucideBuilding2 className="w-[13px] h-[13px]" />
-                All Apartments
+                {flatId}
                 <LucideChevronDown className="w-[13px] h-[13px]" />
               </button>
-              <div className="flex gap-1">
-                {['1H','6H','24H','7D'].map(t => (
-                  <TimePill key={t} label={t} active={activeTimePill === t} onClick={() => setActiveTimePill(t)} />
-                ))}
-              </div>
               <div className="flex items-center gap-[6px] bg-green-500/10 border border-green-500/20 rounded-full px-[10px] py-[3px]">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse-custom ring-4 ring-green-500/20"></span>
                 <span className="text-[12px] font-bold text-green-500">LIVE</span>
@@ -194,7 +192,7 @@ export default function Dashboard() {
                 <Area type="monotone" dataKey="kwh" stroke="#3B82F6" strokeWidth={2}
                   fillOpacity={1} fill="url(#colorKwh)"
                   activeDot={{ r: 6, fill: '#3B82F6', stroke: isDark ? '#0A0F1E' : '#fff', strokeWidth: 2 }} />
-                <Scatter data={chartData.filter(d => d.anomaly)} fill="#EF4444" shape={(props) => {
+                <Scatter dataKey="kwh" data={chartData.filter(d => d.anomaly)} fill="#EF4444" shape={(props) => {
                   const { cx, cy } = props;
                   return (
                     <g>
