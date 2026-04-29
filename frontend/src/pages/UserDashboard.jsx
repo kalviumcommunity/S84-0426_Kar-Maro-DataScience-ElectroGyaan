@@ -73,11 +73,11 @@ export default function UserDashboard() {
         </div>
 
         {/* KPI CARDS ROW */}
-        <div className="flex flex-col lg:flex-row gap-5 w-full mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full mb-6">
           {/* Card 1 */}
           <KPICard 
             accentColor="amber" 
-            label="MY USAGE TODAY" 
+            label="THIS MONTH'S USAGE" 
             icon={<LucideZap className="w-[14px] h-[14px] text-amber-500" />}
             value={<>{stats?.totalConsumption?.toFixed(1) || '--'} <span className="text-[14px] text-gray-400 font-inter">kWh</span></>}
             subText={`${stats?.recordCount || 0} readings`}

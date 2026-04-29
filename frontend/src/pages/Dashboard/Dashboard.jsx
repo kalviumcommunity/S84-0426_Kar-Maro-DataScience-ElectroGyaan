@@ -26,6 +26,7 @@ export default function Dashboard() {
       hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
     }),
     kwh: d.units_kWh,
+    anomalyKwh: d.isAnomaly ? d.units_kWh : null,
     anomaly: d.isAnomaly,
     id: d.flatId
   }));
@@ -95,7 +96,7 @@ export default function Dashboard() {
             icon={<LucideZap className="w-[15px] h-[15px] text-amber-500" />}
             value={<>{stats?.totalConsumption?.toFixed(1) || '--'} <span className="text-[14px] text-[var(--color-text-muted)] font-inter">kWh</span></>}
             trend={stats?.totalConsumption > 0 ? {
-              value: `${((stats.totalConsumption / 800) * 100 - 100).toFixed(1)}%`,
+              value: `${((stats.totalConsumption / (flatId === 'Admin' || flatId === 'all' ? 40000 : 800)) * 100 - 100).toFixed(1)}%`,
               direction: 'up',
               label: 'vs last month'
             } : undefined}
@@ -155,12 +156,12 @@ export default function Dashboard() {
               <h2 className="text-[18px] font-semibold font-inter text-[var(--color-text-primary)]">
                 Real-Time Consumption Monitor
               </h2>
-              <p className="text-[13px] text-[var(--color-text-muted)] mt-[2px]">Last 50 readings — Apartment {flatId}</p>
+              <p className="text-[13px] text-[var(--color-text-muted)] mt-[2px]">Last 50 readings — {(flatId === 'Admin' || flatId === 'all') ? 'All Apartments' : `Apartment ${flatId}`}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <button className="h-[34px] px-3 bg-level-1 border border-subtle rounded-md text-[13px] text-[var(--color-text-secondary)] flex items-center gap-2 hover:bg-level-3 transition-colors">
                 <LucideBuilding2 className="w-[13px] h-[13px]" />
-                {flatId}
+                {(flatId === 'Admin' || flatId === 'all') ? 'All Flats' : flatId}
                 <LucideChevronDown className="w-[13px] h-[13px]" />
               </button>
               <div className="flex items-center gap-[6px] bg-green-500/10 border border-green-500/20 rounded-full px-[10px] py-[3px]">
@@ -182,7 +183,8 @@ export default function Dashboard() {
                 <CartesianGrid strokeDasharray="4 4" vertical={false} stroke={gridColor} />
                 <XAxis dataKey="time" axisLine={false} tickLine={false}
                   tick={{ fill: tickColor, fontSize: 11, fontFamily: 'JetBrains Mono' }} dy={10} />
-                <YAxis domain={[0, 16]} ticks={[0, 4, 8, 12, 16]} axisLine={false} tickLine={false}
+                <YAxis axisLine={false} tickLine={false}
+                  domain={['auto', 'auto']}
                   tick={{ fill: tickColor, fontSize: 11, fontFamily: 'JetBrains Mono' }} dx={-10} />
                 <Tooltip
                   contentStyle={{ backgroundColor: tooltipBg, borderColor: tooltipBorder, borderRadius: '8px', fontSize: '12px' }}
@@ -191,16 +193,18 @@ export default function Dashboard() {
                 />
                 <Area type="monotone" dataKey="kwh" stroke="#3B82F6" strokeWidth={2}
                   fillOpacity={1} fill="url(#colorKwh)"
-                  activeDot={{ r: 6, fill: '#3B82F6', stroke: isDark ? '#0A0F1E' : '#fff', strokeWidth: 2 }} />
-                <Scatter dataKey="kwh" data={chartData.filter(d => d.anomaly)} fill="#EF4444" shape={(props) => {
-                  const { cx, cy } = props;
-                  return (
-                    <g>
-                      <circle cx={cx} cy={cy} r={9} fill="none" stroke="#EF4444" strokeWidth={2} opacity={0.35} />
-                      <circle cx={cx} cy={cy} r={5} fill="#EF4444" />
-                    </g>
-                  );
-                }} />
+                  activeDot={{ r: 6, fill: '#3B82F6', stroke: isDark ? '#0A0F1E' : '#fff', strokeWidth: 2 }}
+                  dot={(props) => {
+                    const { cx, cy, payload, index } = props;
+                    if (!payload.anomaly) return null;
+                    return (
+                      <g key={`dot-${index}`}>
+                        <circle cx={cx} cy={cy} r={9} fill="none" stroke="#EF4444" strokeWidth={2} opacity={0.35} />
+                        <circle cx={cx} cy={cy} r={5} fill="#EF4444" />
+                      </g>
+                    );
+                  }}
+                />
               </ComposedChart>
             </ResponsiveContainer>
           </div>

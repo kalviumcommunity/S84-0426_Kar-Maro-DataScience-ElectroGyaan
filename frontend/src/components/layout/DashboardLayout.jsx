@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LucideLayoutDashboard, LucideActivity, LucideAlertTriangle, LucideTrendingUp, LucideBuilding2, LucideFileText, LucideSettings, LucideHelpCircle, LucideLogOut, LucideChevronDown, LucideBell } from 'lucide-react';
+import { LucideLayoutDashboard, LucideActivity, LucideAlertTriangle, LucideTrendingUp, LucideBuilding2, LucideFileText, LucideSettings, LucideHelpCircle, LucideLogOut, LucideChevronDown, LucideBell, LucideMenu, LucideX } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ThemeToggle from '../ui/ThemeToggle';
 
-const Topbar = () => {
+const Topbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [showDropdown, setShowDropdown] = React.useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   
   // Get page title from current route
   const getPageTitle = () => {
@@ -24,11 +24,14 @@ const Topbar = () => {
   };
 
   return (
-    <div className="fixed left-[240px] right-0 top-0 h-[64px] bg-[var(--color-surface-topbar)] backdrop-blur-[12px] border-b border-subtle px-8 flex justify-between items-center z-50">
-      <div className="flex items-center text-sm">
-        <span className="text-[16px] font-semibold text-[var(--color-text-primary)]">{getPageTitle()}</span>
-        <span className="text-[var(--color-text-faint)] mx-2">/</span>
-        <span className="text-[14px] text-[var(--color-text-muted)] capitalize">{user?.role || 'User'} View</span>
+    <div className="fixed max-md:left-0 md:left-[240px] right-0 top-0 h-[64px] bg-[var(--color-surface-topbar)] backdrop-blur-[12px] border-b border-subtle px-4 md:px-8 flex justify-between items-center z-40">
+      <div className="flex items-center text-sm gap-2">
+        <button onClick={onMenuClick} className="md:hidden p-1 text-[var(--color-text-primary)] hover:bg-level-3 rounded-md">
+          <LucideMenu className="w-5 h-5" />
+        </button>
+        <span className="text-[16px] font-semibold text-[var(--color-text-primary)] hidden sm:inline-block">{getPageTitle()}</span>
+        <span className="text-[var(--color-text-faint)] mx-2 hidden sm:inline-block">/</span>
+        <span className="text-[14px] text-[var(--color-text-muted)] capitalize hidden sm:inline-block">{user?.role || 'User'} View</span>
       </div>
 
       <div className="flex items-center gap-4">
@@ -59,35 +62,35 @@ const Topbar = () => {
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => setShowDropdown(!showDropdown)}
           >
-                <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[12px] text-white font-semibold">
-                  {user?.name?.substring(0, 2).toUpperCase() || 'U'}
-                </div>
-                <LucideChevronDown className="w-[12px] h-[12px] text-[var(--color-text-faint)] group-hover:text-[var(--color-text-primary)] transition-colors" />
+            <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-[12px] text-white font-semibold">
+              {user?.name?.substring(0, 2).toUpperCase() || 'U'}
+            </div>
+            <LucideChevronDown className="w-[12px] h-[12px] text-[var(--color-text-faint)] group-hover:text-[var(--color-text-primary)] transition-colors" />
+          </div>
+          
+          {showDropdown && (
+            <div className="absolute right-0 mt-2 w-48 bg-level-1 border border-subtle rounded-md shadow-lg py-1 z-50">
+              <div className="px-4 py-2 border-b border-subtle overflow-hidden">
+                <p className="text-[14px] font-medium text-[var(--color-text-primary)] truncate">{user?.name || 'User'}</p>
+                <p className="text-[12px] text-[var(--color-text-faint)] truncate">{user?.email || 'user@example.com'}</p>
               </div>
-              
-              {showDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-level-1 border border-subtle rounded-md shadow-lg py-1 z-50">
-                  <div className="px-4 py-2 border-b border-subtle overflow-hidden">
-                    <p className="text-[14px] font-medium text-[var(--color-text-primary)] truncate">{user?.name || 'User'}</p>
-                    <p className="text-[12px] text-[var(--color-text-faint)] truncate">{user?.email || 'user@example.com'}</p>
-                  </div>
-                  <button 
-                    onClick={() => {
-                      setShowDropdown(false);
-                      navigate('/settings');
-                    }}
-                    className="w-full text-left px-4 py-2 text-[14px] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-level-2 transition-colors flex items-center gap-2"
-                  >
-                    <LucideSettings className="w-4 h-4" /> Settings
-                  </button>
-                  <button 
-                    onClick={async () => {
-                      setShowDropdown(false);
-                      await logout();
-                      navigate('/login');
-                    }}
-                    className="w-full text-left px-4 py-2 text-[14px] text-red-500 hover:bg-level-2 transition-colors flex items-center gap-2"
-                  >
+              <button 
+                onClick={() => {
+                  setShowDropdown(false);
+                  navigate('/settings');
+                }}
+                className="w-full text-left px-4 py-2 text-[14px] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-level-2 transition-colors flex items-center gap-2"
+              >
+                <LucideSettings className="w-4 h-4" /> Settings
+              </button>
+              <button 
+                onClick={async () => {
+                  setShowDropdown(false);
+                  await logout();
+                  navigate('/login');
+                }}
+                className="w-full text-left px-4 py-2 text-[14px] text-red-500 hover:bg-level-2 transition-colors flex items-center gap-2"
+              >
                 <LucideLogOut className="w-[14px] h-[14px]" />
                 Log out
               </button>
@@ -99,7 +102,7 @@ const Topbar = () => {
   );
 };
 
-const Sidebar = () => {
+const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -109,8 +112,17 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-[240px] bg-level-1 border-r border-subtle flex flex-col overflow-y-auto">
-      {/* Header */}
+    <>
+      {/* Mobile overlay */}
+      {isMobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+      
+      <div className={`fixed left-0 top-0 h-screen w-[240px] bg-level-1 border-r border-subtle flex flex-col overflow-y-auto z-50 transition-transform duration-300 md:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        {/* Header */}
       <div className="h-[64px] px-5 flex items-center gap-[10px] border-b border-subtle shrink-0">
         <span className="text-amber-400 font-bold text-[18px] drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]">⚡</span>
         <span className="text-[16px] font-bold text-[var(--color-text-primary)] tracking-tight">ElectroGyaan AI</span>
@@ -173,6 +185,7 @@ const Sidebar = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
@@ -184,7 +197,14 @@ const NavItem = ({ to, icon, label, badge }) => {
   const props = to ? { to } : {};
 
   return (
-    <Wrapper {...props} className={`h-[36px] px-[12px] rounded-md flex items-center justify-between cursor-pointer transition-all duration-150 group ${active ? 'bg-blue-500/10 border-l-[2px] border-blue-500 -ml-[2px]' : 'hover:bg-level-2'}`}>
+    <Wrapper 
+      {...props} 
+      onClick={() => {
+        // If clicking a link, we might want to auto-close menu on mobile
+        // but since we don't have setIsMobileOpen here, we rely on the route change
+      }}
+      className={`h-[36px] px-[12px] rounded-md flex items-center justify-between cursor-pointer transition-all duration-150 group ${active ? 'bg-blue-500/10 border-l-[2px] border-blue-500 -ml-[2px]' : 'hover:bg-level-2'}`}
+    >
       <div className="flex items-center gap-[10px]">
         <div className={`${active ? 'text-blue-500' : 'text-[var(--color-text-faint)] group-hover:text-[var(--color-text-secondary)]'}`}>
           {icon}
@@ -203,11 +223,13 @@ const NavItem = ({ to, icon, label, badge }) => {
 };
 
 export default function DashboardLayout({ children }) {
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
   return (
-    <div className="min-h-screen bg-level-0 font-inter text-[var(--color-text-primary)]">
-      <Sidebar />
-      <Topbar />
-      <main className="ml-[240px] mt-[64px] min-h-[calc(100vh-64px)] overflow-x-hidden bg-level-0">
+    <div className="min-h-screen bg-level-0 font-inter text-[var(--color-text-primary)] md:pl-[240px] pt-[64px]">
+      <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
+      <Topbar onMenuClick={() => setIsMobileOpen(!isMobileOpen)} />
+      <main className="min-h-[calc(100vh-64px)] overflow-x-hidden bg-level-0">
         {children}
       </main>
     </div>

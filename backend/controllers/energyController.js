@@ -1,7 +1,7 @@
 const axios = require('axios');
 const EnergyData = require('../models/EnergyData');
 
-const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://127.0.0.1:8000';
 const ML_TIMEOUT_MS = parseInt(process.env.ML_TIMEOUT_MS) || 3000;
 
 exports.ingestReading = async (req, res) => {
@@ -66,12 +66,48 @@ exports.getHistory = async (req, res) => {
   try {
     const { flatId } = req.params;
 
-    const records = await EnergyData.find({ flatId })
-      .sort({ timestamp: -1 })
-      .limit(50)
-      .lean();
+    let ascending = [];
 
-    const ascending = records.reverse();
+    if (flatId === 'Admin' || flatId === 'all') {
+      // Admin dashboard: fetch just recent data and group
+      const recentLimit = new Date(Date.now() - 10 * 60 * 1000); // last 10 minutes is plenty for 50 readings 
+      const fetchFlats = Array.from({length: 50}, (_, i) => `A${101 + i}`);
+      
+      const records = await EnergyData.aggregate([
+        { $match: { flatId: { $in: fetchFlats }, timestamp: { $gte: recentLimit } } },
+        {
+          $group: {
+            _id: {
+              $subtract: [
+                { $toLong: "$timestamp" },
+                { $mod: [{ $toLong: "$timestamp" }, 5000] }
+              ]
+            },
+            units_kWh: { $sum: "$units_kWh" },
+            isAnomaly: { $max: "$isAnomaly" }
+          }
+        },
+        { $sort: { _id: -1 } },
+        { $limit: 50 },
+        {
+          $project: {
+            _id: 0,
+            timestamp: { $toDate: "$_id" },
+            units_kWh: 1,
+            isAnomaly: { $cond: [{ $eq: ["$isAnomaly", true] }, true, false] }
+          }
+        },
+        { $sort: { timestamp: 1 } }
+      ]);
+      ascending = records;
+    } else {
+      const query = { flatId };
+      const records = await EnergyData.find(query)
+        .sort({ timestamp: -1 })
+        .limit(50)
+        .lean();
+      ascending = records.reverse();
+    }
 
     return res.status(200).json({
       success: true,
@@ -93,6 +129,7 @@ exports.getPrediction = async (req, res) => {
     const targetTimestamp = new Date(Date.now() + 3600000).toISOString();
 
     try {
+      const payloadId = (flatId === 'Admin' || flatId === 'all') ? 'A101' : flatId; // Approximate using base flat + scale factor, or just base flat
       const mlResponse = await axios.post(
         `${ML_SERVICE_URL}/api/ml/predict`,
         {
@@ -103,9 +140,15 @@ exports.getPrediction = async (req, res) => {
         }
       );
 
+      // Scale up prediction if we are calculating for 50 apartments
+      let predUnits = mlResponse.data.predicted_units_kWh;
+      if (flatId === 'Admin' || flatId === 'all') {
+         predUnits = predUnits * 50;
+      }
+
       return res.status(200).json({
         success: true,
-        predicted_units_kWh: mlResponse.data.predicted_units_kWh,
+        predicted_units_kWh: predUnits,
         target_timestamp: mlResponse.data.target_timestamp,
         flatId
       });
@@ -133,25 +176,52 @@ exports.getStats = async (req, res) => {
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    const records = await EnergyData.find({
-      flatId,
-      timestamp: { $gte: startOfMonth }
-    }).lean();
+    const query = (flatId === 'Admin' || flatId === 'all') 
+      ? { flatId: { $in: Array.from({length: 50}, (_, i) => `A${101 + i}`) }, timestamp: { $gte: startOfMonth } } 
+      : { flatId, timestamp: { $gte: startOfMonth } };
 
-    const totalConsumption = records.reduce((sum, r) => sum + r.units_kWh, 0);
-    const avgConsumption = records.length > 0 ? totalConsumption / records.length : 0;
-    const anomalyCount = records.filter(r => r.isAnomaly).length;
+    const aggData = await EnergyData.aggregate([
+      { $match: query },
+      { 
+        $group: {
+          _id: null,
+          totalConsumption: { $sum: "$units_kWh" },
+          anomalyCount: { $sum: { $cond: [{ $eq: ["$isAnomaly", true] }, 1, 0] } },
+          recordCount: { $sum: 1 }
+        }
+      }
+    ]);
 
-    const lastReading = await EnergyData.findOne({ flatId })
+    const result = aggData[0] || { totalConsumption: 0, anomalyCount: 0, recordCount: 0 };
+    
+    const daysPassed = Math.max(1, new Date().getDate());
+    
+    // Normalize consumption to prevent simulator interval inflation
+    let realisticTotalConsumption = 0;
+    if (result.recordCount > 0) {
+      const avgPower = result.totalConsumption / result.recordCount;
+      const activeFlatsCount = (flatId === 'Admin' || flatId === 'all') ? 50 : 1;
+      realisticTotalConsumption = avgPower * 24 * daysPassed * activeFlatsCount;
+    }
+
+    let avgConsumption = 0;
+    if (flatId === 'Admin' || flatId === 'all') {
+      avgConsumption = realisticTotalConsumption / (50 * daysPassed);
+    } else {
+      avgConsumption = realisticTotalConsumption / daysPassed;
+    }
+
+    const lastReadingQuery = (flatId === 'Admin' || flatId === 'all') ? {} : { flatId };
+    const lastReading = await EnergyData.findOne(lastReadingQuery)
       .sort({ timestamp: -1 })
       .lean();
 
     const stats = {
-      totalConsumption: parseFloat(totalConsumption.toFixed(2)),
+      totalConsumption: parseFloat(realisticTotalConsumption.toFixed(2)),
       avgConsumption: parseFloat(avgConsumption.toFixed(2)),
-      anomalyCount,
+      anomalyCount: result.anomalyCount,
       lastReading: lastReading || null,
-      recordCount: records.length
+      recordCount: result.recordCount
     };
 
     return res.status(200).json({
@@ -175,8 +245,12 @@ exports.getAnomalies = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const filter = { isAnomaly: true };
-    if (flatId !== 'all') {
+    if (flatId !== 'all' && flatId !== 'Admin') {
       filter.flatId = flatId;
+    } else {
+      const fetchFlats = Array.from({length: 50}, (_, i) => `A${101 + i}`);
+      filter.flatId = { $in: fetchFlats };
+      filter.timestamp = { $gte: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) };
     }
 
     const total = await EnergyData.countDocuments(filter);
@@ -208,8 +282,13 @@ exports.getHourlyPattern = async (req, res) => {
   try {
     const { flatId } = req.params;
 
+    const fetchFlats = Array.from({length: 50}, (_, i) => `A${101 + i}`);
+    const matchQuery = (flatId === 'all' || flatId === 'Admin') 
+      ? { flatId: { $in: fetchFlats }, timestamp: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } } 
+      : { flatId };
+
     const heatmapData = await EnergyData.aggregate([
-      { $match: { flatId } },
+      { $match: matchQuery },
       {
         $group: {
           _id: {
